@@ -37,7 +37,7 @@ def registersubmit():
 	# Use email address for uniqueness. 
 	for user_file in user_files:
 		with open(user_dir + user_file, 'r') as f:
-			data = json.load(user_dir + user_file)
+			data = json.load(f)
 
 			if request.form["email"] == data["email"]:
 				error = True 
