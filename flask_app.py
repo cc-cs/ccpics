@@ -41,20 +41,20 @@ def registersubmit():
 
 			if request.form["email"] == data["email"]:
 				error = True
-			else:
-				new_file_path = user_dir + "{0:08d}".format(max_id + 1) + ".txt"
 
-				with open(new_file_path, 'w') as write_file:
-					user_data = {}
-					user_data["username"] = request.form["username"]
-					user_data["password"] = request.form["password"]
-					user_data["email"] = request.form["email"]
-					json.dump(user_data, write_file)
+        if error:
+            break
 
-		if error:
-			break
+    if error:
+        return "Error: User already exists"
+    else:
+        new_file_path = user_dir + "{0:08d}".format(max_id + 1) + ".txt"
 
-	if error:
-		return "Error: User already exists"
-	else:
+		with open(new_file_path, 'w') as write_file:
+			user_data = {}
+			user_data["username"] = request.form["username"]
+			user_data["password"] = request.form["password"]
+			user_data["email"] = request.form["email"]
+			json.dump(user_data, write_file)
+
 		return "Success! You have been registered!"

@@ -1,0 +1,1 @@
+{"password": "def", "username": "abc", "email": "ghi@jkl.com"}
