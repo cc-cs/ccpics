@@ -4,6 +4,9 @@
 from flask import Flask
 from flask import request
 from flask import render_template
+import json 
+from os import listdir
+from os.path import isfile, join
 
 app = Flask(__name__)
 
@@ -17,6 +20,40 @@ def register():
 
 @app.route('/registersubmit', methods=['POST'])
 def registersubmit():
+	user_dir = "pics/data/user/"
+	user_files = [f for f in listdir(user_dir) if isfile(join(user_dir, f))]
+	error = False 
 
 
+	# Get the largest user ID
+	max_id = 0 
+	for user_file in user_files:
+		user_id = int(user_file[:8])
 
+		if user_id > max_id: 
+			max_id = user_id 
+
+	# Read the files to check if the user exists.
+	# Use email address for uniqueness. 
+	for user_file in user_files:
+		with open(user_dir + user_file, 'r') as f:
+			data = json.load(user_dir + user_file)
+
+			if request.form["email"] == data["email"]:
+				error = True 
+			else: 
+				new_file_path = user_dir + str(max_id + 1) + ".txt"
+				
+				with open(new_file_path, 'w') as write_file:
+					user_data["username"] = request.form["username"]		
+					user_data["password"] = request.form["password"]
+					user_data["email"] = request.form["email"]
+					json.dump(user_data, write_file)
+
+		if error: 
+			break 
+
+	if error: 
+		return "Error: User already exists"
+	else: 
+		return "Success! You have been registered!"
