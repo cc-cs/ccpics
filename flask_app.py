@@ -45,6 +45,7 @@ def registersubmit():
 				new_file_path = user_dir + str(max_id + 1) + ".txt"
 				
 				with open(new_file_path, 'w') as write_file:
+					user_data = {}
 					user_data["username"] = request.form["username"]		
 					user_data["password"] = request.form["password"]
 					user_data["email"] = request.form["email"]
