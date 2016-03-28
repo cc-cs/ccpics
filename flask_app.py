@@ -42,7 +42,8 @@ def registersubmit():
 			if request.form["email"] == data["email"]:
 				error = True 
 			else: 
-				new_file_path = user_dir + str(max_id + 1) + ".txt"
+				new_file_path = user_dir + ("{0:%08d}".format(max_id + 1)) + \
+					".txt"
 				
 				with open(new_file_path, 'w') as write_file:
 					user_data = {}
