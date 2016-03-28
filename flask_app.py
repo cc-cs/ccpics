@@ -58,3 +58,26 @@ def registersubmit():
             json.dump(user_data, write_file)
 
         return "Success! You have been registered!"
+
+
+@app.route('/loginsubmit', methods=['POST'])
+def loginsubmit():
+    user_dir = "/home/ccpics42/mysite/pics/data/user/"
+    user_files = [f for f in listdir(user_dir) if isfile(join(user_dir, f))]
+    error = False
+
+    user_id = -1
+    for user_file in user_files:
+        if request.form["username"] == user_file[8:]:
+            user_id = int(user_file[:8])
+            break
+    if user_id = -1:
+        return "Error: User name does not exist"
+    infomation_file = user_dir + "{0:08d}".format(user_id) + ".txt"
+    with open(new_file_path, 'r') as read_file:
+        user_data = json.load(read_file)
+    if user_data["password"] != request.form["password"]:
+        return "Error: User name or password is incorrect"
+    else:
+        return "Success! You have logged in!"
+    
