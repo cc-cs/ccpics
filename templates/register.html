@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>PiCS Register</title>
-</head>
-<body>
+{% extends 'layout.html' %}
+{% set title = 'PiCS Registration' %}
+
+{% block body %}
     <h1>This is the registration page!</h1>
     <form method="POST" action="/registersubmit">
         <table>
@@ -32,5 +30,4 @@
             </tr>
         </table>
     </form>
-</body>
-</html>
+{% endblock %}
