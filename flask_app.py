@@ -20,7 +20,7 @@ def register():
 
 @app.route('/registersubmit', methods=['POST'])
 def registersubmit():
-	user_dir = "./pics/data/user/"
+	user_dir = "/home/ccpics42/mysite/pics/data/user/"
 	user_files = [f for f in listdir(user_dir) if isfile(join(user_dir, f))]
 	error = False 
 
