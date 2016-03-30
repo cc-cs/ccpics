@@ -1,1 +1,1 @@
-{"password": "def", "username": "abc", "email": "ghi@jkl.com"}
+{"email": "ujpandey1@cougars.ccis.edu", "id": "00000001", "password": "securepassword", "username": "ujpandey1"}

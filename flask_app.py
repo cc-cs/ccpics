@@ -3,10 +3,10 @@
 
 from flask import Flask, redirect, request, render_template, url_for, session 
 import json
-from os import listdir
-from os.path import isfile, join
+import os
 
 app = Flask(__name__)
+root_path = os.path.dirname(os.path.abspath(__file__))
 
 @app.route('/')
 def root():
@@ -18,10 +18,8 @@ def register():
 
 @app.route('/registersubmit', methods=['POST'])
 def registersubmit():
-    user_dir = "data/user/"
-    user_files = [f for f in listdir(user_dir) if isfile(join(user_dir, f))]
-    error = False
-
+    user_dir = os.path.join(root_path, "pics/data/user/")
+    user_files = [f for f in os.listdir(user_dir) if os.path.isfile(os.path.join(user_dir, f))]
 
     # Get the largest user ID
     max_id = 0
@@ -38,18 +36,15 @@ def registersubmit():
             data = json.load(f)
 
             if request.form["email"] == data["email"]:
-                error = True
-
-        if error:
-            break
-
-    if error:
-        return "Error: User already exists"
-    else:
-        new_file_path = user_dir + "{0:08d}".format(max_id + 1) + ".txt"
+                return "Error: User already exists"
+            
+    else: # no break
+        user_id = "{0:08d}".format(max_id + 1)
+        new_file_path = user_dir + user_id + ".txt"
 
         with open(new_file_path, 'w') as write_file:
             user_data = {}
+            user_data["id"] = user_id
             user_data["username"] = request.form["username"]
             user_data["password"] = request.form["password"]
             user_data["email"] = request.form["email"]
@@ -64,8 +59,8 @@ def login():
 
 @app.route('/loginsubmit', methods=['POST'])
 def loginsubmit():
-    user_dir = "data/user/"
-    user_files = [f for f in listdir(user_dir) if isfile(join(user_dir, f))]
+    user_dir = os.path.join(root_path, "pics/data/user/")
+    user_files = [f for f in os.listdir(user_dir) if os.path.isfile(os.path.join(user_dir, f))]
     user_id = -1
 
     for user_file in user_files:
@@ -73,15 +68,13 @@ def loginsubmit():
             data = json.load(f)
 
             if request.form["username"] == data["username"]:
-                user_id = int(user_file[:8])
+                user_id = data["id"]
+                break
 
-        if user_id != -1: 
-            break
-    
-    if user_id == -1:
+    else: # no break
         return "Error: User name does not exist"
     
-    information_file = user_dir + "{0:08d}".format(user_id) + ".txt"
+    information_file = os.path.join(user_dir, "{}.txt".format(user_id))
     
     with open(information_file, 'r') as read_file:
         user_data = json.load(read_file)
