@@ -1,12 +1,9 @@
-
-# A very simple Flask Hello World app for you to get started with...
-
-from flask import Flask, redirect, request, render_template, url_for, session 
 import json
 import os
 
-app = Flask(__name__)
-root_path = os.path.dirname(os.path.abspath(__file__))
+from flask import redirect, request, render_template, url_for, session
+
+from app import app
 
 @app.route('/')
 def root():
@@ -18,21 +15,17 @@ def register():
 
 @app.route('/registersubmit', methods=['POST'])
 def registersubmit():
-    user_dir = os.path.join(root_path, "pics/data/user/")
+    user_dir = os.path.join(app.config['DATA_PATH'], "user")
     user_files = [f for f in os.listdir(user_dir) if os.path.isfile(os.path.join(user_dir, f))]
 
-    # Get the largest user ID
-    max_id = 0
-    for user_file in user_files:
-        user_id = int(user_file[:8])
-
-        if user_id > max_id:
-            max_id = user_id
+    # Get the largest existing user ID
+    max_id = int(max(user_files)[:-4])
+    print("MAX ID: ", max_id)
 
     # Read the files to check if the user exists.
     # Use email address for uniqueness.
     for user_file in user_files:
-        with open(user_dir + user_file, 'r') as f:
+        with open(os.path.join(user_dir, user_file), 'r') as f:
             data = json.load(f)
 
             if request.form["email"] == data["email"]:
@@ -40,7 +33,7 @@ def registersubmit():
             
     else: # no break
         user_id = "{0:08d}".format(max_id + 1)
-        new_file_path = user_dir + user_id + ".txt"
+        new_file_path = os.path.join(user_dir, "{}.txt".format(user_id))
 
         with open(new_file_path, 'w') as write_file:
             user_data = {}
@@ -52,19 +45,18 @@ def registersubmit():
 
         return "Success! You have been registered!"
 
-
 @app.route('/login')
 def login():
     return render_template('login.html')
 
 @app.route('/loginsubmit', methods=['POST'])
 def loginsubmit():
-    user_dir = os.path.join(root_path, "pics/data/user/")
+    user_dir = os.path.join(app.config['DATA_PATH'], "user")
     user_files = [f for f in os.listdir(user_dir) if os.path.isfile(os.path.join(user_dir, f))]
     user_id = -1
 
     for user_file in user_files:
-        with open(user_dir + user_file, 'r') as f:
+        with open(os.path.join(user_dir, user_file), 'r') as f:
             data = json.load(f)
 
             if request.form["username"] == data["username"]:
@@ -91,9 +83,3 @@ def logout():
     session.pop('logged_in', None)
     session.pop('user_id', None)
     return redirect(url_for('root'))
-
-app.secret_key = b"\x9d\x00\xb1\x80b\xd6\t'\x853V\xbf\xac2\xcd\x98Y\x88\xf3BKO\x9c\xa3"
-
-if __name__ == '__main__':
-    app.debug = True 
-    app.run()
