@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
-{% set title = 'PiCS Login' %}
+{% set title = 'PiCS Registration' %}
 
 {% block body %}
-<h1>Log In</h1>
-<form method="POST" action="/login-submit">
+<h1>This is the registration page!</h1>
+<form method="POST" action="/registration-submit">
   <table>
     <tr>
       <td>Username:</td>
@@ -15,6 +15,12 @@
       <td>Password:</td>
       <td>
         <input type="password" id="password" name="password" placeholder="Your password..." />
+      </td>
+    </tr>
+    <tr>
+      <td>Email:</td>
+      <td>
+        <input type="email" id="email" name="email" placeholder="Your email address..." />
       </td>
     </tr>
     <tr>
