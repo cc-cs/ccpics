@@ -8,12 +8,21 @@
 <nav id="main_nav">
 	{% if not session.logged_in %}
 		<a href="{{ url_for('login') }}">Log in</a>
-		<a href="{{ url_for('register') }}">Register</a>
+		<a href="{{ url_for('registration') }}">Register</a>
 	{% else %}
 		<a href="{{ url_for('logout') }}">Log Out</a>
 	{% endif %}
 </nav>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class=flashes>
+  {% for category, message in messages %}
+  <li class="{{ category }}">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
 
 {% block body %}{% endblock %}
 

@@ -1,9 +1,8 @@
-import json
 import os
 
-from flask import abort, redirect, request, render_template, url_for, session
+from flask import abort, flash, json, redirect, request, render_template, url_for, session
 
-from app import app
+from .. import app
 
 @app.route('/login')
 def login():
@@ -22,21 +21,25 @@ def login_submit():
                 user_id = data["id"]
                 break
     else: # no break
-        return "Error: User name does not exist"
+        flash("User name does not exist!", 'error')
+        return render_template('login.html')
     
     information_file = os.path.join(user_dir, "{}.txt".format(user_id))
     try:
         with open(information_file, 'r') as read_file:
             user_data = json.load(read_file)
             if user_data["password"] != request.form["password"]:
-                return "Error: User name or password is incorrect"
+                # TODO: Remember username entered???
+                flash("User name or password is incorrect!", 'error')
+                return render_template('login.html')
     except EnvironmentError:
         abort(500)
 
     session["logged_in"] = True 
     session["user_id"] = user_id 
 
-    return "Success! You have logged in!"
+    flash("You have logged in!", 'success')
+    return redirect(url_for('index'))
 
 @app.route('/logout')
 def logout(): 
