@@ -13,3 +13,7 @@ def not_found(error):
 @app.errorhandler(409)
 def conflict(error):
     return make_response(jsonify({'error': error.description}), 409)
+
+@app.errorhandler(500)
+def internal_error(error):
+    return make_response(jsonify({'error': error.description}), 500)
