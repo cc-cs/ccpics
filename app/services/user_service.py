@@ -11,7 +11,9 @@ from .. import app
 DATA_DIR = os.path.join(app.config['DATA_PATH'], 'user')
 ESSENTIALS = set(['id', 'username', 'password', 'email'])
 UNIQUES = set(['username', 'email'])
-FIELDS = ESSENTIALS | UNIQUES | set([])
+PUBLIC = set(['id', 'username']) # TODO : Better names!!!
+HIDDEN = set(['password']) # TODO: Is this better than having an accessible set of keys when a?
+FIELDS = ESSENTIALS | UNIQUES | PUBLIC | set([])
 
 
 ##############################################################################
@@ -78,19 +80,16 @@ def save_user(user_id, data):
 ##############################################################################
 # Workers
 ##############################################################################
-def fetch_users():
+def fetch_users(queried_info=PUBLIC):
     '''Return a map of all users with their data enlisted.'''
     
     user_files = fetch_user_files()
-
-    # list of things to return when requested all users, keep it small
-    essentials = set(['id', 'username']) 
     users = []
     try:
         for user_file in user_files:
             with open(user_file, 'r') as f:
                 data = json.load(f)
-                users.append({k: data.get(k, None) for k in essentials})
+                users.append({k: data.get(k, None) for k in queried_info})
     except EnvironmentError:
         return {'status': 500, 'error': 'Internal server error reading data.'}
     
@@ -101,7 +100,7 @@ def fetch_user(user_id):
     try:
         with open(user_file, 'r') as f:
             user_data = json.load(f)
-            user_data.pop('password')
+            user_data = {k: user_data[k] for k in user_data if k not in HIDDEN}
     except EnvironmentError:
         return {'status': 404, 'error': "User doesn't exist."}
 
@@ -126,7 +125,7 @@ def add_user(user_data):
     # Store the information if no errors encountered.
     save_user(user_id, user_data)
 
-    user_data.pop('password')
+    user_data = {k: user_data[k] for k in user_data if k not in HIDDEN}
     
     return {'user': user_data}
 
