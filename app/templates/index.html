@@ -2,6 +2,9 @@
 {% set title = "Welcome to PiCS!" %}
 
 {% block body %}
-		<h1>Welcome to the PiCS website!</h1>
+<h1>Welcome to the PiCS website!</h1>
+{% if session['logged_in'] %}
+<p><a href="/questions">questions</a></p>
+{% endif %}
 {% endblock %}
 

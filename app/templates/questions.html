@@ -3,18 +3,22 @@
 
 {% block body %}
 <h1>PiCS Questions</h1>
-<table>
-  <tr>
-    <th>Id:</th>
-    <th>Title:</th>
-    <th>Last Attempted:</th>
-  </tr>
-  {% for question in questions %}
-  <tr>
-    <td>{{ question.id }}</td>
-    <td>{{ question.title }}</td>
-    <td>TBI</td>
-  </tr>
+<table class="questions">
+  <thead>
+    <tr>
+      <th style="padding: 5px">Id:</th>
+      <th>Title:</th>
+      <th>Last Attempted:</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for question in questions %}
+    <tr>
+      <td style="padding: 5px">{{ question.id }}</td>
+      <td><a href="/questions/{{question.id}}">{{ question.title }}</a></td>
+      <td>TBI</td>
+    </tr>
+  </tbody>
   {% endfor %}
 </table>
 {% endblock %}
