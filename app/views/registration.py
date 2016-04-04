@@ -1,6 +1,3 @@
-import os
-import requests
-
 from flask import flash, json, redirect, request, render_template, url_for
 
 from .. import app
@@ -29,6 +26,7 @@ def registration_submit():
 
     if not error:
         # TODO: Switch to web requests for the service??? Check below for howto.
+        # import requests
         # reg_req_url = request.url_root + USER_SERVICE_URL
         # reg_req = requests.post(url=reg_req_url, json=form_data)
         # if reg_req.status_code == 201:
