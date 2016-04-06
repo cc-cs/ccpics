@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% set title = '{} : submission {}'.format(submission['question-title'], submission.id) %}
+
+{% block body %}
+<h1>Submission details for submission {{ submission.id }}</h1>
+<p>Submission for
+  <a href="/questions/{{ submission['question-id'] }}">
+    {{ submission['question-title'] }}
+  </a>
+</p>
+<p>Submitted {{ momentjs(submission.timestamp).calendar() }}</p>
+<p>Status: {{ submission.status }}</p>
+<p>Language: {{ submission.language }}</p>
+<p>Code:
+  <pre class="submission-source-code">{{ submission['source-code'] }}</pre>
+</p>
+{% endblock %}

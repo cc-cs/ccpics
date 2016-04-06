@@ -6,7 +6,7 @@
 <table class="questions">
   <thead>
     <tr>
-      <th style="padding: 5px">Id:</th>
+      <th>Id:</th>
       <th>Title:</th>
       <th>Last Attempted:</th>
     </tr>
@@ -14,11 +14,11 @@
   <tbody>
     {% for question in questions %}
     <tr>
-      <td style="padding: 5px">{{ question.id }}</td>
+      <td>{{ question.id }}</td>
       <td><a href="/questions/{{question.id}}">{{ question.title }}</a></td>
       <td>TBI</td>
     </tr>
+    {% endfor %}
   </tbody>
-  {% endfor %}
 </table>
 {% endblock %}

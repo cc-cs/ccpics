@@ -10,6 +10,10 @@ app.config['ROOT_PATH'] = os.path.join(os.path.dirname(os.path.abspath(__file__)
 app.config['DATA_PATH'] = os.path.join(app.config['ROOT_PATH'], "data")
 app.config['SERVICE_URL'] = 'pics-service/api/v1.0/'
 
+# For nicer time display
+from .lib.momentjs import momentjs
+app.jinja_env.globals['momentjs'] = momentjs
+
 from . import errorhandler
 from . import services
 from . import views

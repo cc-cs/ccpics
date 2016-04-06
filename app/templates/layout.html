@@ -2,6 +2,7 @@
 <html>
   <head>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+    <script src="/static/js/moment.min.js"></script>
     <title>{{ title }}</title>
   </head>
   
@@ -25,7 +26,8 @@
     {% endif %}
     {% endwith %}
 
-    {% block body %}{% endblock %}
+    {% block body %}
+    {% endblock %}
 
   </body>
 </html>

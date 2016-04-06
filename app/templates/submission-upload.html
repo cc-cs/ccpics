@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% set title = '{} : submission'.format(question.title) %}
+
+{% block body %}
+<h2>Submitting a solution for {{ question.id }} : {{ question.title }}</h2>
+<form method="POST" enctype="multipart/form-data" action="/submission-result">
+  <input type="hidden" name="question-id" value="{{ question.id }}" />
+  <input type="hidden" name="question-title" value="{{ question.title }}" />
+  <p>Please select the language for your submission:</p>
+  {% for language in question.languages %}
+  {% if language == "C++" %}
+  <p><input type="radio" name="language" value="{{ language }}" checked="checked" /> {{ language }}</p>
+  {% else %}
+  <p><input type="radio" name="language" value="{{ language }}" /> {{ language }}</p>
+  {% endif %}
+  {% endfor %}
+  <p>Upload a file with your source code:</p>
+  <p><input type="file" name="source-file" /></p>
+  <p>... or paste it into the box:</p>
+  <p><textarea rows="10" cols="75" name="source-code"></textarea></p>
+  <p><input type="submit" value="Submit" /></p>
+</form>
+{% endblock %}

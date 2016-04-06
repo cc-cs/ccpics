@@ -35,10 +35,10 @@ def registration_submit():
         # reg_req_reply = reg_req.json()
 
         form_data = json.loads(json.dumps(request.form))
-        form_data.pop("submit")
-        reg_req_reply = user_service.add_user(user_data=form_data)
-        if 'error' in reg_req_reply:
-            error = reg_req_reply['error']
+        form_data.pop("submit", None)
+        registration_request_response = user_service.add_user(user_data=form_data)
+        if 'error' in registration_request_response:
+            error = registration_request_response['error']
         else:
             flash("You have been registered!", "success")
             return redirect(url_for('index'))

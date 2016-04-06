@@ -10,8 +10,6 @@
 </p>
 
 {% if session['logged_in'] %}
-<p>
-  TODO: ADD stats for the question and a link to submit a solution.
-</p>
+<button><a href="/submission-upload/{{ question.id }}">Submit a solution!</a></button>
 {% endif %}
 {% endblock %}

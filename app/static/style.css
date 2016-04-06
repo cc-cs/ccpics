@@ -48,9 +48,24 @@ table.questions
   border: 2px solid;
   border-color: black;
   border-collapse: collapse;
+  background: #aacbe2;
 }
 
 table.questions th, table.questions td
+{
+  border: 1px solid;
+  padding: 10px;
+}
+
+table.submissions
+{
+  border: 2px solid;
+  border-color: black;
+  border-collapse: collapse;
+  background: #aacbe2;
+}
+
+table.submissions th, table.submissions td
 {
   border: 1px solid;
   padding: 10px;
@@ -60,6 +75,15 @@ table.questions th, table.questions td
 {
   display: inline-block;
   padding: 20px;
-  border:2px dashed;
+  border: 2px dashed;
   white-space: pre-line;
+}
+
+.submission-source-code
+{
+  display: inline-block;
+  padding: 20px;
+  border: 2px dashed;
+  white-space: pre;
+  margin: 0;
 }

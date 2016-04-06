@@ -35,7 +35,8 @@ def login_submit():
     except EnvironmentError:
         abort(500)
 
-    session["logged_in"] = True 
+    session["logged_in"] = True
+    session["username"] = user_data["username"]
     session["user_id"] = user_id 
 
     flash("You have logged in!", 'success')

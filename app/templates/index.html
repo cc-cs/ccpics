@@ -3,8 +3,9 @@
 
 {% block body %}
 <h1>Welcome to the PiCS website!</h1>
+<h2><a href="/questions">Questions</a></h2>
 {% if session['logged_in'] %}
-<p><a href="/questions">questions</a></p>
+<h2><a href="/submissions">My Submissions</a></h2>
 {% endif %}
 {% endblock %}
 

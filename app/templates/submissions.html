@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% set title = '{} : submissions'.format(session['username']) %}
+
+{% block body %}
+<h1>{{ session['username'] }}'s Submissions</h1>
+
+<table class="submissions">
+  <thead>
+    <tr>
+      <th>Id</th>
+      <th>Question</th>
+      <th>Submitted on</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for submission in submissions %}
+    <tr>
+      <td>
+        <a href="/submissions/{{ submission.id }}">
+          {{ submission.id }}
+        </a>
+      </td>
+      <td>
+        <a href="/questions/{{ submission['question-id'] }}">
+          {{ submission['question-title'] }} ({{ submission['question-id'] }})
+        </a>
+      </td>
+      <td>{{ momentjs(submission.timestamp).calendar() }}</td>
+      <td>{{ submission.status }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td></td>
+    </tr>    
+  </tbody>
+</table>
+{% endblock %}

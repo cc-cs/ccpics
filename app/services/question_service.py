@@ -27,7 +27,7 @@ def fetch_max_question_id():
 
     question_ids = fetch_question_ids()
     
-    return int(max(question_ids)[:-4])
+    return int(max(question_ids)[:-4]) if submission_ids else -1
 
 def fetch_question_files():
     '''Return all valid question data files.'''
