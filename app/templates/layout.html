@@ -1,33 +1,70 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-    <script src="/static/js/moment.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <title>{{ title }}</title>
   </head>
   
   <body>
-    <nav id="main_nav">
-      {% if not session.logged_in %}
-      <a href="{{ url_for('login') }}">Log in</a>
-      <a href="{{ url_for('registration') }}">Register</a>
-      {% else %}
-      <a href="{{ url_for('logout') }}">Log Out</a>
-      {% endif %}
-    </nav>
+    <div id="main-container" class="container">
+      <div class="container">
+        <nav class="navbar navbar-dark bg-inverse">
+          <ul class="nav navbar-nav">
+            <li>
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li>
+              <a class="nav-link" href="/questions">Questions</a>
+            </li>
+            <li>
+              <a class="nav-link" href="/users">Users</a>
+            </li>
+            {% if not session.logged_in %}
+            <li>
+              <a class="nav-link" href="{{ url_for('login') }}">Log in</a>
+            </li>
+            <li>
+              <a class="nav-link" href="{{ url_for('registration') }}">Register</a>
+            </li>
+            {% else %}
+            <li>
+              <a class="nav-link" href="/submissions">My Submissions</a>
+            </li>
+            <li>
+              <a class="nav-link" href="/users/{{ session.user_id }}">
+                My Profile
+              </a>
+            </li>
+            <li>
+              <a class="nav-link" href="{{ url_for('logout') }}">Log Out</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <ul class=flashes>
-      {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+      <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
 
-    {% block body %}
-    {% endblock %}
+        <div class="flashes">
+          {% for category, message in messages %}
+            <div class="alert {{ category }}">
+              <strong>{{ message }}</strong>
+            </div>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
 
+        {% block body %}
+        {% endblock %}
+      </div>
+    </div>
+
+    <script src="/static/js/moment.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
   </body>
 </html>
