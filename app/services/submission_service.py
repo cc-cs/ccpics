@@ -30,7 +30,6 @@ def fetch_max_submission_id():
     '''Return the largest submission id created so far AS AN INT.'''
 
     submission_ids = fetch_submission_ids()
-    print("SIDS", submission_ids)
 
     return int(max(submission_ids)[:8]) if submission_ids else -1
 
@@ -87,6 +86,8 @@ def fetch_queued_submissions():
             queue = json.load(f)
     except EnvironmentError as e:
         queue = {'queue': {}}
+    except ValueError:
+        return {'status': 500, 'error': 'Internal Server Error'}
 
     return queue
 
@@ -94,6 +95,8 @@ def queue_submission(submission_id, timestamp):
     '''Queue the submission to be processed by the grader.'''
 
     queue = fetch_queued_submissions()
+    if 'error' in queue:
+        return queue
     queue['queue'][submission_id] = timestamp
 
     try:
@@ -101,6 +104,8 @@ def queue_submission(submission_id, timestamp):
             json.dump(queue, f)
     except EnvironmentError:
         return {'status': 500, 'error': 'Internal Server Error while adding.'}
+
+    return {'status': 200}
 
 ##############################################################################
 # Workers
@@ -151,7 +156,9 @@ def add_submission(submission_data):
     submission_data['timestamp'] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S Z")
 
     # Queue the submission to be graded.
-    queue_submission(submission_id, submission_data['timestamp'])
+    submit_to_queue = queue_submission(submission_id, submission_data['timestamp'])
+    if 'error' in submit_to_queue:
+        return {'status': submit_to_queue['status'], 'error': submit_to_queue['error']}
     submission_data['status'] = 'Queued'
 
     # Store the information if no errors encountered.
@@ -189,4 +196,6 @@ def create_submission():
 @app.route('/pics-service/api/v1.0/submissions-queue', methods=['GET'])
 def get_queued_submissions():
     submissions_queue = fetch_queued_submissions()
+    if 'error' in submissions_queue:
+        abort(submissions_queue['status'], submissions_queue['error'])
     return jsonify(submissions_queue)
