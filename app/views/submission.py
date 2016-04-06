@@ -47,7 +47,10 @@ def submission_result():
 
 @app.route('/submissions')
 def render_submissions():
+    admin = request.args.get('admin', None)
     submissions = submission_service.fetch_submissions()['submissions']
+    if admin and session['user_id'] in app.config['ADMINS']:
+        return render_template('admin-submissions.html', submissions=submissions)
     submissions = [submission for submission in submissions if submission['user-id'] == session['user_id']]
     return render_template('submissions.html', submissions=submissions)
 

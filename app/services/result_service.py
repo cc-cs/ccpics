@@ -11,9 +11,9 @@ from .. import app
 # TODO: Add authentication for some of these info.
 
 DATA_DIR = os.path.join(app.config['DATA_PATH'], 'result')
-ESSENTIALS = set(['question-id', 'user-id', 'language', 'source-code'])
+ESSENTIALS = set(['submission-id', 'test-results', 'verdict'])
 UNIQUES = set([])
-PUBLIC = set(['id', 'language', 'question-id', 'question-title', 'user-id', 'timestamp', 'status']) 
+PUBLIC = set(['submission-id', 'verdict', 'timestamp'])
 HIDDEN = set([])
 FIELDS = ESSENTIALS | UNIQUES | PUBLIC | set([])
 
@@ -30,7 +30,6 @@ def fetch_max_result_id():
     '''Return the largest result id created so far AS AN INT.'''
 
     result_ids = fetch_result_ids()
-    print("SIDS", result_ids)
 
     return int(max(result_ids)[:8]) if result_ids else -1
 
@@ -79,21 +78,20 @@ def save_result(result_id, data):
     except EnvironmentError:
         return {'status': 500, 'error': "Internal Server Error while saving."}
 
-def queue_result(result_id, timestamp):
-    '''Queue the result to be processed by the grader.'''
+def chronicle_result(result_id, timestamp):
+    '''Chronicle the result to be processed by the grader.'''
 
     try:
-        with open(os.path.join(DATA_DIR, "grading.queue"), "r") as f:
-            queue = json.load(f)
+        with open(os.path.join(DATA_DIR, "grading.chronicle"), "r") as f:
+            chronicle = json.load(f)
     except EnvironmentError as e:
-        print(e)
-        queue = {'queue': {}}
+        chronicle = {'chronicle': {}}
         
-    queue['queue'][result_id] = timestamp
+    chronicle['chronicle'][result_id] = timestamp
 
     try:
-        with open(os.path.join(DATA_DIR, 'grading.queue'), 'w') as f:
-            json.dump(queue, f)
+        with open(os.path.join(DATA_DIR, 'grading.chronicle'), 'w') as f:
+            json.dump(chronicle, f)
     except EnvironmentError:
         return {'status': 500, 'error': 'Internal Server Error while adding.'}
 
@@ -145,9 +143,9 @@ def add_result(result_data):
     # Add a timestamp.
     result_data['timestamp'] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S Z")
 
-    # Queue the result to be graded.
-    queue_result(result_id, result_data['timestamp'])
-    result_data['status'] = 'Queued'
+    # Chronicle the result to be graded.
+    chronicle_result(result_id, result_data['timestamp'])
+    result_data['status'] = 'Chronicled'
 
     # Store the information if no errors encountered.
     save_result(result_id, result_data)
