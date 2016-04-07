@@ -1,3 +1,26 @@
+{% set navigation_bar = [
+    ('/', 'index', 'Index'),
+    ('/questions', 'questions', 'Questions'),
+    ('/users', 'users', 'Users')
+] -%}
+
+{% if not session.logged_in %}
+  {% set user_or_guest_nav = [
+    ('/login', 'login', 'Login'),
+    ('/registration', 'register', 'Register')
+  ] -%}
+{% else %}
+  {% set user_or_guest_nav = [
+    ('/submissions', 'submissions', 'Submissions'),
+    ('/users/' ~ session.user_id, 'profile', 'My Profile'),
+    ('/logout', 'logout', 'Logout')
+  ] -%}
+{% endif %}
+
+{% set navigation_bar = navigation_bar + user_or_guest_nav %}
+
+{% set active_page = active_page|default('index') %}
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -12,35 +35,13 @@
       <div class="container">
         <nav class="navbar navbar-dark bg-inverse">
           <ul class="nav navbar-nav">
-            <li>
-              <a class="nav-link" href="/">Home</a>
-            </li>
-            <li>
-              <a class="nav-link" href="/questions">Questions</a>
-            </li>
-            <li>
-              <a class="nav-link" href="/users">Users</a>
-            </li>
-            {% if not session.logged_in %}
-            <li>
-              <a class="nav-link" href="{{ url_for('login') }}">Log in</a>
-            </li>
-            <li>
-              <a class="nav-link" href="{{ url_for('registration') }}">Register</a>
-            </li>
-            {% else %}
-            <li>
-              <a class="nav-link" href="/submissions">My Submissions</a>
-            </li>
-            <li>
-              <a class="nav-link" href="/users/{{ session.user_id }}">
-                My Profile
-              </a>
-            </li>
-            <li>
-              <a class="nav-link" href="{{ url_for('logout') }}">Log Out</a>
-            </li>
-            {% endif %}
+            {% for href, id, caption in navigation_bar %}
+                <li {% if id == active_page %} class="active nav-link" 
+                    {% else %} class="nav-link" {% endif %}>
+                  <a href="{{ href }}">{{ caption }}</a>
+                </li>
+            {% endfor %}
+            
           </ul>
         </nav>
       </div>
