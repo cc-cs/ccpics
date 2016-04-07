@@ -12,6 +12,7 @@
 {% else %}
 {% set user_or_guest_nav = [
 ('/submissions', 'submissions', 'Submissions'),
+('/results', 'results', 'Results'),
 ('/users/' ~ session.user_id, 'profile', 'My Profile'),
 ('/logout', 'logout', 'Logout')
 ] -%}
