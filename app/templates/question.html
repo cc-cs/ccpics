@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% set title = '{}: {}'.format(question.id, question.title) %}
+{% set active_page = "question" %}
 
 {% block body %}
 <h1>{{ question.id }}: {{ question.title }}</h1>

@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% set title = '{} : submission'.format(question.title) %}
+{% set active_page = "submission-upload" %}
 
 {% block body %}
 <h2>Submitting a solution for {{ question.id }} : {{ question.title }}</h2>

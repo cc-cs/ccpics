@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% set title = '{} : submission {}'.format(submission['question-title'], submission.id) %}
+{% set active_page = "submission" %}
 
 {% block body %}
 <h1>Submission details for submission {{ submission.id }}</h1>

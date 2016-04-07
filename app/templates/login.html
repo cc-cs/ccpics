@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% set title = 'PiCS Login' %}
+{% set active_page = "login" %}
 
 {% block body %}
 <h1>Log In</h1>
@@ -19,7 +20,7 @@
     </tr>
     <tr>
       <td>
-        <input type="submit" value="Submit" name="submit" id="submit" />
+        <input class="btn btn-primary" type="submit" value="Submit" name="submit" id="submit" />
       </td>
     </tr>
   </table>

@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% set title = 'PiCS Registration' %}
+{% set active_page = "register" %}
 
 {% block body %}
 <h1>Register for a Portal into Computer Science!</h1>
@@ -25,7 +26,7 @@
     </tr>
     <tr>
       <td>
-        <input type="submit" value="Submit" name="submit" id="submit" />
+        <input class="btn btn-primary" type="submit" value="Submit" name="submit" id="submit" />
       </td>
     </tr>
   </table>
