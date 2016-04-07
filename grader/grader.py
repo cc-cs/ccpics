@@ -5,24 +5,29 @@ import requests
 import subprocess
 import urllib
 
-queue_url = 'http://localhost:5000/pics-service/api/v1.0/submissions-queue'
-dequeue_url = 'http://localhost:5000/pics-service/api/v1.0/submissions-dequeue'
-chronicle_url = 'http://localhost:5000/pics-service/api/v1.0/results-chronicle'
-submission_url = 'http://localhost:5000/pics-service/api/v1.0/submissions/{}'
-question_url = 'http://localhost:5000/pics-service/api/v1.0/questions/{}'
-solution_url = 'http://localhost:5000/pics-service/api/v1.0/solutions/{}/{}'
-result_url = 'http://localhost:5000/pics-service/api/v1.0/results'
-
 data_dir = os.path.join(os.getcwd(), '../data/results/')
 
+remote_url = 'http://ccpics42.pythonanywhere.com/'
+local_url = 'http://localhost:5000/'
+urls = {}
+
+def set_urls(url_root):
+    urls['queue_url'] = url_root + 'pics-service/api/v1.0/submissions-queue'
+    urls['dequeue_url'] = url_root + 'pics-service/api/v1.0/submissions-dequeue'
+    urls['chronicle_url'] = url_root + 'pics-service/api/v1.0/results-chronicle'
+    urls['submission_url'] = url_root + 'pics-service/api/v1.0/submissions/{}'
+    urls['question_url'] = url_root + 'pics-service/api/v1.0/questions/{}'
+    urls['solution_url'] = url_root + 'pics-service/api/v1.0/solutions/{}/{}'
+    urls['result_url'] = url_root + 'pics-service/api/v1.0/results'
+
 def get_new_submissions():
-    queue_request_response = requests.get(url=queue_url)
+    queue_request_response = requests.get(url=urls['queue_url'])
     if queue_request_response:
         queue = queue_request_response.json()['queue']
     else:
         return {'status': 400, 'error': "Failed to fetch the submissions queue."}
 
-    chronicle_request_response = requests.get(url=chronicle_url)
+    chronicle_request_response = requests.get(url=urls['chronicle_url'])
     if chronicle_request_response:
         chronicle = chronicle_request_response.json()['chronicle']
     else:
@@ -36,13 +41,15 @@ def get_resource(resource_url, resource_params):
     request_url = resource_url.format(*[urllib.parse.quote(param) for param in resource_params])
     resource_request_response = requests.get(url=request_url)
     if resource_request_response:
+        print(request_url)
+        print(resource_request_response)
         resource = resource_request_response.json()
     else:
         return {'status': 400, 'error': "Failed to fetch the resource details."}
     return resource
 
 def submit_result(data):
-    result_submission_response = requests.post(url=result_url, json=data)
+    result_submission_response = requests.post(url=urls['result_url'], json=data)
     if result_submission_response == 201:
         return {'status': 201}
     return result_submission_response    
@@ -51,19 +58,19 @@ def process_submissions():
     submission_ids = get_new_submissions()['new-submission-ids']
     result_submission_responses = []
     for submission_id in submission_ids:
-        submission = get_resource(submission_url, [submission_id])
+        submission = get_resource(urls['submission_url'], [submission_id])
         if 'error' in submission:
             return submission
         else:
             submission = submission['submission']
         
-        question = get_resource(question_url, [submission['question-id']])
+        question = get_resource(urls['question_url'], [submission['question-id']])
         if 'error' in question:
             return question
         else:
             question = question['question']
 
-        solution = get_resource(solution_url, [submission['question-id'], submission['language']])
+        solution = get_resource(urls['solution_url'], [submission['question-id'], submission['language']])
         if 'error' in solution:
             return solution
         else:
@@ -161,4 +168,6 @@ def grade_submission(submission, solution, question):
     return grades
 
 if __name__ == '__main__':
+    set_urls(url_root=local_url)
+    set_urls(url_root=remote_url)
     print(process_submissions())

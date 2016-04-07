@@ -29,9 +29,13 @@
       </td>
       <td>{{ momentjs(submission.timestamp).calendar() }}</td>
       <td>
+        {% if submission['result-id'] %}
         <a href="/results/{{ submission['result-id'] }}">
           {{ submission.status }}
         </a>
+        {% else %}
+        {{ submission.status }}
+        {% endif %}
       </td>        
     </tr>
     {% endfor %}
