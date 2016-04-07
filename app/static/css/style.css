@@ -73,6 +73,20 @@ table.submissions th, table.submissions td
   padding: 10px;
 }
 
+table.results
+{
+  border: 2px solid;
+  border-color: black;
+  border-collapse: collapse;
+  background: #aacbe2;
+}
+
+table.results th, table.results td
+{
+  border: 1px solid;
+  padding: 10px;
+}
+
 .question-body
 {
   display: inline-block;

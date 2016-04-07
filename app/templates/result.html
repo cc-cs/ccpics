@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% set title = 'Submission {} : result'.format(result['submission-id'], result.id) %}
+
+{% block body %}
+<h1>Result details for result {{ result.id }}</h1>
+<p>Result for submission
+  <a href="/submissions/{{ result['submission-id'] }}">
+    {{ result['submission-id'] }}
+  </a>
+</p>
+<p>Graded: {{ momentjs(result.timestamp).calendar() }}</p>
+<p>Verdict: {{ result.verdict }}</p>
+{% for test_result in result['test-results'] %}
+<p>Test #{{ loop.index }}:
+  <pre class="test-result">{{ test_result }}</pre>
+</p>
+{% endfor %}
+{% endblock %}

@@ -74,6 +74,7 @@ def save_question(question_id, data):
     except EnvironmentError:
         return {'status': 500, 'error': "Internal Server Error while saving."}
 
+    return {'status': 200}
 
 ##############################################################################
 # Workers

@@ -2,18 +2,20 @@ import os
 
 from datetime import datetime
 
-from flask import abort, json, jsonify
+from flask import abort, json, jsonify, request
 
 from .. import app
+
+from . import submission_service
 
 # TODO: Abstract away all the data operations into a Model interface.
 # TODO: Remove all this duplication between services!!!
 # TODO: Add authentication for some of these info.
 
 DATA_DIR = os.path.join(app.config['DATA_PATH'], 'result')
-ESSENTIALS = set(['submission-id', 'test-results', 'verdict'])
+ESSENTIALS = set(['user-id', 'submission-id', 'test-results', 'verdict'])
 UNIQUES = set([])
-PUBLIC = set(['submission-id', 'verdict', 'timestamp'])
+PUBLIC = set(['id', 'user-id', 'submission-id', 'verdict', 'timestamp'])
 HIDDEN = set([])
 FIELDS = ESSENTIALS | UNIQUES | PUBLIC | set([])
 
@@ -78,15 +80,27 @@ def save_result(result_id, data):
     except EnvironmentError:
         return {'status': 500, 'error': "Internal Server Error while saving."}
 
-def chronicle_result(result_id, timestamp):
-    '''Chronicle the result to be processed by the grader.'''
+    return {'status': 200}
+
+def fetch_chronicled_results():
+    '''Return all the results that are on chronicle to be processed by the grader'''
 
     try:
         with open(os.path.join(DATA_DIR, "grading.chronicle"), "r") as f:
             chronicle = json.load(f)
     except EnvironmentError as e:
         chronicle = {'chronicle': {}}
-        
+    except ValueError:
+        return {'status': 500, 'error': 'Internal Server Error'}
+
+    return chronicle
+
+def chronicle_result(result_id, timestamp):
+    '''Chronicle the result to be processed by the grader.'''
+
+    chronicle = fetch_chronicled_results()
+    if 'error' in chronicle:
+        return chronicle
     chronicle['chronicle'][result_id] = timestamp
 
     try:
@@ -94,6 +108,8 @@ def chronicle_result(result_id, timestamp):
             json.dump(chronicle, f)
     except EnvironmentError:
         return {'status': 500, 'error': 'Internal Server Error while adding.'}
+
+    return {'status': 200}
 
 ##############################################################################
 # Workers
@@ -143,12 +159,19 @@ def add_result(result_data):
     # Add a timestamp.
     result_data['timestamp'] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S Z")
 
-    # Chronicle the result to be graded.
+    # Update the submission with the result information.
+    submission_updated = submission_service.update_result(result_data)
+    if 'error' in submission_updated:
+        return submisison_updated
+    
+    # Chronicle the result as graded.
     chronicle_result(result_id, result_data['timestamp'])
     result_data['status'] = 'Chronicled'
 
     # Store the information if no errors encountered.
-    save_result(result_id, result_data)
+    saved = save_result(result_id, result_data)
+    if 'error' in saved:
+        return saved
 
     result_data = {k: result_data[k] for k in result_data if k not in HIDDEN}
     
@@ -178,3 +201,10 @@ def create_result():
     if 'error' in result_creation:
         abort(result_creation['status'], result_creation['error'])
     return jsonify(result_creation), 201
+
+@app.route('/pics-service/api/v1.0/results-chronicle', methods=['GET'])
+def get_chronicled_results():
+    results_chronicle = fetch_chronicled_results()
+    if 'error' in results_chronicle:
+        abort(results_chronicle['status'], results_chronicle['error'])
+    return jsonify(results_chronicle)

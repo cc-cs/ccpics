@@ -2,5 +2,7 @@
   "id": "00000000",
   "title": "Hello, World!",
   "languages": ["C++", "Java"],
-  "body": "Write a program that prints \"Hello, World!\" on a line."
+  "body": "Write a program that prints \"Hello, World!\" on a line.",
+  "test-cases": [],
+  "time-out": 10
 }

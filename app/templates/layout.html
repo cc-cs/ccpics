@@ -33,6 +33,9 @@
               <a class="nav-link" href="/submissions">My Submissions</a>
             </li>
             <li>
+              <a class="nav-link" href="/results">My Results</a>
+            </li>
+            <li>
               <a class="nav-link" href="/users/{{ session.user_id }}">
                 My Profile
               </a>
@@ -51,20 +54,20 @@
 
         <div class="flashes">
           {% for category, message in messages %}
-            <div class="alert {{ category }}">
-              <strong>{{ message }}</strong>
-            </div>
+          <div class="alert {{ category }}">
+            <strong>{{ message }}</strong>
+          </div>
           {% endfor %}
-        </ul>
-        {% endif %}
-        {% endwith %}
+          </ul>
+          {% endif %}
+          {% endwith %}
 
-        {% block body %}
-        {% endblock %}
+          {% block body %}
+          {% endblock %}
+        </div>
       </div>
-    </div>
 
-    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
   </body>
 </html>

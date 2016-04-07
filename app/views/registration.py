@@ -7,6 +7,7 @@ USER_SERVICE_URL = app.config['SERVICE_URL'] + 'users'
 
 @app.route('/registration')
 def registration():
+    print(app.config['SERVICE_URL'])
     return render_template('registration.html')
 
 @app.route('/registration-submit', methods=['POST'])

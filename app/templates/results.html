@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% set title = '{} : results'.format(session['username']) %}
+
+{% block body %}
+<h1>{{ session['username'] }}'s Results</h1>
+
+<table class="results">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Submission ID</th>
+      <th>Graded on</th>
+      <th>Verdict</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for result in results %}
+    <tr>
+      <td>
+        <a href="/results/{{ result.id }}">
+          {{ result.id }}
+        </a>
+      </td>
+      <td>
+        <a href="/submissions/{{ result['submission-id'] }}">
+          {{ result['submission-id'] }}
+        </a>
+      </td>
+      <td>{{ momentjs(result.timestamp).calendar() }}</td>
+      <td>{{ result.verdict }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td> </td>
+      <td> </td>
+      <td> </td>
+      <td></td>
+    </tr>    
+  </tbody>
+</table>
+{% endblock %}

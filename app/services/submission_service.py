@@ -13,7 +13,7 @@ from .. import app
 DATA_DIR = os.path.join(app.config['DATA_PATH'], 'submission')
 ESSENTIALS = set(['question-id', 'user-id', 'language', 'source-code'])
 UNIQUES = set([])
-PUBLIC = set(['id', 'language', 'question-id', 'question-title', 'user-id', 'timestamp', 'status']) 
+PUBLIC = set(['id', 'language', 'question-id', 'question-title', 'user-id', 'timestamp', 'status', 'result-id']) 
 HIDDEN = set([])
 FIELDS = ESSENTIALS | UNIQUES | PUBLIC | set([])
 
@@ -78,6 +78,8 @@ def save_submission(submission_id, data):
     except EnvironmentError:
         return {'status': 500, 'error': "Internal Server Error while saving."}
 
+    return {'status': 200}
+
 def fetch_queued_submissions():
     '''Return all the submissions that are on queue to be processed by the grader'''
 
@@ -104,6 +106,22 @@ def queue_submission(submission_id, timestamp):
             json.dump(queue, f)
     except EnvironmentError:
         return {'status': 500, 'error': 'Internal Server Error while adding.'}
+
+    return {'status': 200}
+
+def dequeue_submission(submission_id):
+    '''Dequeue the submission once processed by the grader.'''
+
+    queue = fetch_queued_submissions()
+    if 'error' in queue:
+        return queue
+    queue['queue'].pop(submission_id)
+    
+    try:
+        with open(os.path.join(DATA_DIR, 'grading.queue'), 'w') as f:
+            json.dump(queue, f)
+    except EnvironmentError:
+        return {'status': 500, 'error': 'Internal Server Error while queueing.'}
 
     return {'status': 200}
 
@@ -162,12 +180,36 @@ def add_submission(submission_data):
     submission_data['status'] = 'Queued'
 
     # Store the information if no errors encountered.
-    save_submission(submission_id, submission_data)
+    saved = save_submission(submission_id, submission_data)
+    if 'error' in saved:
+        return saved
 
     submission_data = {k: submission_data[k] for k in submission_data if k not in HIDDEN}
     
     return {'submission': submission_data}
 
+def update_result(result_data):
+    submission_id = result_data['submission-id']
+
+    dequeued = dequeue_submission(submission_id)
+    if 'error' in dequeued:
+        return dequeued
+    
+    submission = fetch_submission(submission_id)
+    if 'error' in submission:
+        return submission
+
+    submission_data = submission['submission']
+    submission_data['status'] = result_data['verdict']
+    submission_data['result-id'] = result_data['id']
+
+    saved = save_submission(submission_id, submission_data)
+    if 'error' in saved:
+        return saved
+
+    submission_data = {k: submission_data[k] for k in submission_data if k not in HIDDEN}
+
+    return {'submission' : submission_data}
 
 ###############################################################################
 # Service API endpoints
@@ -199,3 +241,12 @@ def get_queued_submissions():
     if 'error' in submissions_queue:
         abort(submissions_queue['status'], submissions_queue['error'])
     return jsonify(submissions_queue)
+
+@app.route('/pics-service/api/v1.0/submissions-dequeue', methods=['POST'])
+def delete_submission_from_queue():
+    submission_id = request.json['submission-id']
+    dequeued = dequeue_submission(submission_id)
+    if 'error' in dequeued:
+        abort(dequeued['status'], dequeued['error'])
+    return jsonify(dequeued)
+
