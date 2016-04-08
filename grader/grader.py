@@ -103,8 +103,12 @@ def run_cpp(filename, test_cases,time_out):
     else:
         p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
                                   stdout=subprocess.PIPE)
-        output = p.communicate(timeout=time_out)[0]
-        outputs.append(output)
+        try:
+            output = p.communicate(timeout=time_out)[0]
+            outputs.append(output)
+        except subprocess.TimeoutExpired:
+            outputs.append('')
+                        
     return outputs
 
 def get_java_name(s):
