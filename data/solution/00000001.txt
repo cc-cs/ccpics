@@ -1,0 +1,6 @@
+{
+  "id": "00000001",
+  "language": "C++",
+  "question-id": "00000001",
+  "source-code": "#include <iostream>\r\n\r\nint main()\r\n{\r\n    int x, y;\r\n    std::cin >> x >> y;\r\n    std::cout << x + y << std::endl;\r\n\r\n    return 0;\r\n}"
+}
