@@ -96,6 +96,7 @@ def run_cpp(filename, test_cases,time_out):
         for test in test_cases:
             if not os.path.exists(filename + '.exe'):
                 outputs.append(("Not compiled", "Timed-out", ''))
+                break
             else:
                 p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
                                      stdout=subprocess.PIPE,
@@ -132,6 +133,7 @@ def run_java(filename, test_cases, time_out):
         for test in test_cases:
         	if not os.path.exists(filename + '.class'):
         		outputs.append(("Not compiled", "Timed-out", ''))
+        		break
         	else:
         		try:
 		            p = subprocess.Popen('java %s' % (filename), shell=True,
@@ -181,21 +183,32 @@ def load_code(source_json, test_cases, time_out):
 def grade_submission(submission, solution, question):
     test_cases = question['test-cases']
     time_out = question['time-out']
+    result = {}
     outputs = load_code(submission, test_cases, time_out)
     expecteds = load_code(solution, test_cases, time_out)
+    result['outputs'] = outputs
+    result['expecteds'] = expecteds
+    result['test-cases'] = question['test-cases']
     grades = []
-    if outputs == 'Unsupported Language':
-        return outputs
+    # if outputs == 'Unsupported Language':
+    #     return outputs
+    if outputs[0][0] == 'Not Compiled':
+    	result['verdict'] = 'Compilation Error'
+    	result['grades'] = grades
+    	result[
+    	return result
     for output, expected in zip(outputs, expecteds):
-        if output[0] == 'Not Compiled':
-            grades.append('Compilation Error')
-        elif output[1] == 'Timed-out':
+        if output[1] == 'Timed-out':
+        	result['verdict'] = 'Time-out'
             grades.append('Time-out')
         if output[2] == expected[2]:
             grades.append('pass')
         else:
             grades.append('fail')
-    return grades
+    if 'verdict' not in result.keys():
+    	result['verdict'] = 'fail' if 'fail' in grades else 'pass'
+    result['grades'] = grades
+    return result
 
 if __name__ == '__main__':
     set_urls(url_root=local_url)
