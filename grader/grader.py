@@ -191,7 +191,7 @@ def grade_submission(submission, solution, question):
             grades.append('Compilation Error')
         elif output[1] == 'Timed-out':
             grades.append('Time-out')
-        if output == expected:
+        if output[2] == expected[2]:
             grades.append('pass')
         else:
             grades.append('fail')
