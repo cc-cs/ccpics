@@ -82,11 +82,12 @@ def process_submissions():
                   'submission-id': submission['id'],
                   'question-id': question['id'],
                   'test-results': test_results,
-                  'verdict': test_results['verdict']
-                  'test-cases': test_results['test-cases']
-                  'outputs': test_results['outputs']
-                  'expecteds': test_results['expecteds']
+                  'verdict': test_results['verdict'],
+                  'test-cases': test_results['test-cases'],
+                  'outputs': test_results['outputs'],
+                  'expecteds': test_results['expecteds'],
                   }
+        
         result_submission_responses.append(submit_result(data=result))
 
     return result_submission_responses        
@@ -98,29 +99,29 @@ def run_cpp(filename, test_cases,time_out):
     if test_cases:
         for test in test_cases:
             if not os.path.exists(filename + '.exe'):
-                outputs.append(("Not compiled", "Timed-out", ''))
+                outputs.append(("CE", "TO", ''))
                 break
             else:
                 p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
                                      stdout=subprocess.PIPE,
                                      stdin=subprocess.PIPE)
                 try:
-                    output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0]
-                    outputs.append(("Compiled", 'No time-out', output))
+                    output = str(p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0])
+                    outputs.append(("", '', output))
                 except subprocess.TimeoutExpired:
-                    outputs.append(("Compiled", "Timed-out", ''))
+                    outputs.append(("", "TO", ''))
     # run no input scenario
     else:
         if not os.path.exists(filename + '.exe'):
-            outputs.append(("Not compiled", "Timed-out", ''))
+            outputs.append(("CE", "TO", ''))
         else:
             p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
                                       stdout=subprocess.PIPE)
             try:
-                output = p.communicate(timeout=time_out)[0]
+                output = str(p.communicate(timeout=time_out)[0])
                 outputs.append(("Compiled", 'No time-out', output))
             except subprocess.TimeoutExpired:
-                outputs.append(("Compiled", "Timed-out", ''))
+                outputs.append(("", "TO", ''))
                         
     return outputs
 
@@ -134,31 +135,31 @@ def run_java(filename, test_cases, time_out):
     outputs = []
     if test_cases:
         for test in test_cases:
-        	if not os.path.exists(filename + '.class'):
-        		outputs.append(("Not compiled", "Timed-out", ''))
-        		break
-        	else:
-        		try:
-		            p = subprocess.Popen('java %s' % (filename), shell=True,
-		                                 stdout=subprocess.PIPE,
-		                                 stdin=subprocess.PIPE)
-		            output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0]
-		            outputs.append(("Compiled", "No Time-out", output))
-		        except subprocess.TimeoutExpired:
-		        	outputs.append(("Compiled", "Timed-out", ''))
+            if not os.path.exists(filename + '.class'):
+                outputs.append(("CE", "TO", ''))
+                break
+            else:
+                try:
+                    p = subprocess.Popen('java %s' % (filename), shell=True,
+                                         stdout=subprocess.PIPE,
+                                         stdin=subprocess.PIPE)
+                    output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0]
+                    outputs.append(("", "", output))
+                except subprocess.TimeoutExpired:
+                    outputs.append(("", "TO", ''))
     # run no input scenario
     else:
-    	if not os.path.exists(filename + '.class'):
-    		outputs.append(("Not compiled", "Timed-out", ''))
-    	else:
-    		try:
-	            p = subprocess.Popen('java %s' % (filename), shell=True,
-	                                 stdout=subprocess.PIPE,
-	                                 stdin=subprocess.PIPE)
-	            output = p.communicate(timeout=time_out)[0]
-	            outputs.append(("Compiled", "No Time-out", output))
-	        except subprocess.TimeoutExpired:
-	        	outputs.append(("Compiled", "Timed-out", ''))
+        if not os.path.exists(filename + '.class'):
+            outputs.append(("CE", "Timed-out", ''))
+        else:
+            try:
+                p = subprocess.Popen('java %s' % (filename), shell=True,
+                                     stdout=subprocess.PIPE,
+                                     stdin=subprocess.PIPE)
+                output = p.communicate(timeout=time_out)[0]
+                outputs.append(("", "", output))
+            except subprocess.TimeoutExpired:
+                outputs.append(("", "", ''))
     return outputs
         
 def load_code(source_json, test_cases, time_out):
@@ -195,25 +196,24 @@ def grade_submission(submission, solution, question):
     grades = []
     # if outputs == 'Unsupported Language':
     #     return outputs
-    if outputs[0][0] == 'Not Compiled':
-    	result['verdict'] = 'Compilation Error'
-    	result['grades'] = grades
-    	result[
-    	return result
-    for output, expected in zip(outputs, expecteds):
-        if output[1] == 'Timed-out':
-        	result['verdict'] = 'Time-out'
+    if outputs[0][0] == 'CE': # will be true if program didn't compile
+        result['verdict'] = 'Compilation Error'
+        result['grades'] = grades
+        return result
+    for output, expected in zip(outputs, expecteds): # if compiled go through list
+        if output[1] == 'TO':
+            result['verdict'] = 'Time-out' # One test case ran out of time
             grades.append('Time-out')
-        if output[2] == expected[2]:
-            grades.append('pass')
+        elif output[2] == expected[2]:
+            grades.append('pass') # this test case passed
         else:
-            grades.append('fail')
-    if 'verdict' not in result.keys():
-    	result['verdict'] = 'fail' if 'fail' in grades else 'pass'
+            grades.append('fail') # this test case failed
+    if 'verdict' not in result: # if no verdict has been set, pass is still possible
+        result['verdict'] = 'fail' if 'fail' in grades else 'pass'
     result['grades'] = grades
     return result
 
 if __name__ == '__main__':
     set_urls(url_root=local_url)
-    set_urls(url_root=remote_url)
+    #set_urls(url_root=remote_url)
     print(process_submissions())
