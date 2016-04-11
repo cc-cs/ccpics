@@ -94,20 +94,29 @@ def run_cpp(filename, test_cases,time_out):
     # run test cases scenario (input)
     if test_cases:
         for test in test_cases:
-            p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
-                                 stdout=subprocess.PIPE,
-                                 stdin=subprocess.PIPE)
-            output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0]
-            outputs.append(output)
+            if not os.path.exists(filename + '.exe'):
+                outputs.append(("Not compiled", "Timed-out", ''))
+            else:
+                p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
+                                     stdout=subprocess.PIPE,
+                                     stdin=subprocess.PIPE)
+                try:
+                    output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0]
+                    outputs.append(("Compiled", 'No time-out', output))
+                except subprocess.TimeoutExpired:
+                    outputs.append(("Compiled", "Timed-out", ''))
     # run no input scenario
     else:
-        p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
-                                  stdout=subprocess.PIPE)
-        try:
-            output = p.communicate(timeout=time_out)[0]
-            outputs.append(output)
-        except subprocess.TimeoutExpired:
-            outputs.append('')
+        if not os.path.exists(filename + '.exe'):
+            outputs.append(("Not compiled", "Timed-out", ''))
+        else:
+            p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
+                                      stdout=subprocess.PIPE)
+            try:
+                output = p.communicate(timeout=time_out)[0]
+                outputs.append(("Compiled", 'No time-out', output))
+            except subprocess.TimeoutExpired:
+                outputs.append(("Compiled", "Timed-out", ''))
                         
     return outputs
 
@@ -121,17 +130,30 @@ def run_java(filename, test_cases, time_out):
     outputs = []
     if test_cases:
         for test in test_cases:
-            p = subprocess.Popen('java %s' % (filename), shell=True,
-                                 stdout=subprocess.PIPE,
-                                 stdin=subprocess.PIPE)
-            output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0]
-            outputs.append(output)
+        	if not os.path.exists(filename + '.class'):
+        		outputs.append(("Not compiled", "Timed-out", ''))
+        	else:
+        		try:
+		            p = subprocess.Popen('java %s' % (filename), shell=True,
+		                                 stdout=subprocess.PIPE,
+		                                 stdin=subprocess.PIPE)
+		            output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0]
+		            outputs.append(("Compiled", "No Time-out", output))
+		        except subprocess.TimeoutExpired:
+		        	outputs.append(("Compiled", "Timed-out", ''))
     # run no input scenario
     else:
-        p = subprocess.Popen('java %s' % (filename), shell=True,
-                                  stdout=subprocess.PIPE)
-        output = p.communicate(timeout=time_out)[0]
-        outputs.append(output)
+    	if not os.path.exists(filename + '.class'):
+    		outputs.append(("Not compiled", "Timed-out", ''))
+    	else:
+    		try:
+	            p = subprocess.Popen('java %s' % (filename), shell=True,
+	                                 stdout=subprocess.PIPE,
+	                                 stdin=subprocess.PIPE)
+	            output = p.communicate(timeout=time_out)[0]
+	            outputs.append(("Compiled", "No Time-out", output))
+	        except subprocess.TimeoutExpired:
+	        	outputs.append(("Compiled", "Timed-out", ''))
     return outputs
         
 def load_code(source_json, test_cases, time_out):
@@ -165,6 +187,10 @@ def grade_submission(submission, solution, question):
     if outputs == 'Unsupported Language':
         return outputs
     for output, expected in zip(outputs, expecteds):
+        if output[0] == 'Not Compiled':
+            grades.append('Compilation Error')
+        elif output[1] == 'Timed-out':
+            grades.append('Time-out')
         if output == expected:
             grades.append('pass')
         else:
