@@ -77,12 +77,15 @@ def process_submissions():
             solution = solution['solution']
         
         test_results = grade_submission(submission=submission, solution=solution, question=question)
-        verdict = 'fail' if 'fail' in test_results else 'pass'
+        #verdict = 'fail' if 'fail' in test_results else 'pass'
         result = {'user-id': submission['user-id'],
                   'submission-id': submission['id'],
                   'question-id': question['id'],
                   'test-results': test_results,
-                  'verdict': verdict
+                  'verdict': test_results['verdict']
+                  'test-cases': test_results['test-cases']
+                  'outputs': test_results['outputs']
+                  'expecteds': test_results['expecteds']
                   }
         result_submission_responses.append(submit_result(data=result))
 
