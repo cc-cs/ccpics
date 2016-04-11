@@ -29,8 +29,6 @@ h2
   float: left;
 }
 
-
-
 .error
 {
   background: #f2dede;
@@ -82,6 +80,20 @@ table.results
 }
 
 table.results th, table.results td
+{
+  border: 1px solid;
+  padding: 10px;
+}
+
+table.users
+{
+  border: 2px solid;
+  border-color: black;
+  border-collapse: collapse;
+  background: #aacbe2;
+}
+
+table.users th, table.users td
 {
   border: 1px solid;
   padding: 10px;

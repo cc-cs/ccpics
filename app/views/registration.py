@@ -42,7 +42,8 @@ def registration_submit():
             error = registration_request_response['error']
         else:
             flash("You have been registered!", "success")
-            return redirect(url_for('index'))
+            user = registration_request_response['user']
+            return render_template('user.html', user=user)
 
     error = error if error else "Sorry, something went wrong. Please try again later."
     flash(error, 'error')

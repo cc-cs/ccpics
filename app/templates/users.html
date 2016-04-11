@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% set title = 'PiCS Users' %}
+{% set active_page = "users" %}
+
+{% block body %}
+<h1>PiCS Users</h1>
+<table class="users">
+  <thead>
+    <tr>
+      <th>Id:</th>
+      <th>Username:</th>
+      <th>Stats:</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td><a href="/users/{{user.id}}">{{ user.username }}</a></td>
+      <td>TBI</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

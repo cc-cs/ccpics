@@ -12,7 +12,7 @@ app.config['SERVICE_URL'] = 'pics-service/api/v1.0/'
 app.config['ADMINS'] = ['00000000', '00000001', '00000002', '00000003', '00000004']
 
 # For nicer time display
-#from .lib.momentjs import momentjs #??? why this no work???
+# from .lib.momentjs import momentjs # This didn't work on Ryan's computer, why?
 from . import lib
 app.jinja_env.globals['momentjs'] = lib.momentjs.momentjs
 
