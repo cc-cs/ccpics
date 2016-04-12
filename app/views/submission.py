@@ -3,12 +3,18 @@ from flask import flash, json, redirect, request, render_template, url_for, sess
 from .. import app
 from ..services import question_service
 from ..services import submission_service
+from ..services import result_service
 
 ALLOWED_EXTENSIONS = set(['cpp', 'java', 'txt'])
 
 @app.route('/submission-upload/<question_id>')
 def submission_upload(question_id):
-    question = question_service.fetch_question(question_id=question_id)['question']
+    question = question_service.fetch_question(question_id=question_id)
+    if 'error' in question:
+        abort(question['status'], question['error'])
+
+    question = question['question']
+
     return render_template('submission-upload.html', question=question)
 
 @app.route('/submission-result', methods=['POST'])
@@ -56,5 +62,25 @@ def render_submissions():
 
 @app.route('/submissions/<submission_id>', methods=['GET'])
 def render_submission(submission_id):
-    submission = submission_service.fetch_submission(submission_id=submission_id)['submission']
-    return render_template('submission.html', submission=submission)
+    submission = submission_service.fetch_submission(submission_id=submission_id)
+    if 'error' in submission:
+        abort(submission['status'], submission['error'])
+
+    submission = submission['submission']
+    
+    results = result_service.fetch_results()
+    if 'error' in results:
+        abort(results['status'], results['error'])
+
+    results = results['results']
+    results = [result for result in results
+               if result['submission-id'] == submission['id']]
+
+    result_id = results[0]['id']
+    result = result_service.fetch_result(result_id)
+    if 'error' in result:
+        abort(result['status'], result['error'])
+
+    result = result['result']
+    
+    return render_template('submission.html', submission=submission, result=result)

@@ -8,11 +8,5 @@
     {{ result['submission-id'] }}
   </a>
 </p>
-<p>Graded: {{ momentjs(result.timestamp).calendar() }}</p>
-<p>Verdict: {{ result.verdict }}</p>
-{% for test_result in result['test-results'] %}
-<p>Test #{{ loop.index }}:
-  <pre class="test-result">{{ test_result }}</pre>
-</p>
-{% endfor %}
+{% include '_result.html' %}
 {% endblock %}

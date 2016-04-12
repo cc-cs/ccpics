@@ -157,9 +157,7 @@ def get_parametrized_solution(question_id, language):
     solution = fetch_solution(solution_id)
     if 'error' in solution:
         abort(solution['status'], solution['error'])
-        
     return jsonify(solution)
-    
 
 @app.route('/pics-service/api/v1.0/solutions/<solution_id>', methods=['GET'])
 def get_solution(solution_id):

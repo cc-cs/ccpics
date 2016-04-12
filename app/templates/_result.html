@@ -1,0 +1,10 @@
+<p>Graded: {{ momentjs(result.timestamp).calendar() }}</p>
+<p>Verdict: {{ result.verdict }}</p>
+
+{% for test_result in result['test-results'] %}
+<div class="test-case">
+  <p>Test #{{ loop.index }}:
+    <pre class="test-result">{{ test_result }}</pre>
+  </p>
+</div>
+{% endfor %}
