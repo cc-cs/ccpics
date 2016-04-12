@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout.djhtml' %}
 {% set title = '{}: {}'.format(question.id, question.title) %}
 {% set active_page = "question" %}
 

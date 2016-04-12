@@ -8,7 +8,7 @@ USER_SERVICE_URL = app.config['SERVICE_URL'] + 'users'
 @app.route('/registration')
 def registration():
     print(app.config['SERVICE_URL'])
-    return render_template('registration.html')
+    return render_template('registration.djhtml')
 
 @app.route('/registration-submit', methods=['POST'])
 def registration_submit():
@@ -43,11 +43,11 @@ def registration_submit():
         else:
             flash("You have been registered!", "success")
             user = registration_request_response['user']
-            return render_template('user.html', user=user)
+            return render_template('user.djhtml', user=user)
 
     error = error if error else "Sorry, something went wrong. Please try again later."
     flash(error, 'error')
 
-    return render_template('registration.html')
+    return render_template('registration.djhtml')
 
 

@@ -9,11 +9,11 @@ def render_results():
     admin = request.args.get('admin', None)
     results = result_service.fetch_results()['results']
     if admin and session['user_id'] in app.config['ADMINS']:
-        return render_template('admin-results.html', results=results)
+        return render_template('admin-results.djhtml', results=results)
     results = [result for result in results if result['user-id'] == session['user_id']]
-    return render_template('results.html', results=results)
+    return render_template('results.djhtml', results=results)
 
 @app.route('/results/<result_id>', methods=['GET'])
 def render_result(result_id):
     result = result_service.fetch_result(result_id=result_id)['result']
-    return render_template('result.html', result=result)
+    return render_template('result.djhtml', result=result)

@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout.djhtml' %}
 {% set title = '{} : submission'.format(question.title) %}
 {% set active_page = "submission-upload" %}
 

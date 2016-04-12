@@ -6,7 +6,7 @@ from .. import app
 
 @app.route('/login')
 def login():
-    return render_template('login.html')
+    return render_template('login.djhtml')
 
 @app.route('/login-submit', methods=['POST'])
 def login_submit():
@@ -22,7 +22,7 @@ def login_submit():
                 break
     else: # no break
         flash("User name does not exist!", 'error')
-        return render_template('login.html')
+        return render_template('login.djhtml')
     
     information_file = os.path.join(user_dir, "{}.txt".format(user_id))
     try:
@@ -31,7 +31,7 @@ def login_submit():
             if user_data["password"] != request.form["password"]:
                 # TODO: Remember username entered???
                 flash("User name or password is incorrect!", 'error')
-                return render_template('login.html')
+                return render_template('login.djhtml')
     except EnvironmentError:
         abort(500)
 

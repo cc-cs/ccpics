@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout.djhtml' %}
 {% set title = 'PiCS Questions' %}
 {% set active_page = "questions" %}
 

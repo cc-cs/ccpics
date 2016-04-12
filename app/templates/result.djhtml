@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout.djhtml' %}
 {% set title = 'Submission {} : result'.format(result['submission-id'], result.id) %}
 
 {% block body %}
@@ -8,5 +8,5 @@
     {{ result['submission-id'] }}
   </a>
 </p>
-{% include '_result.html' %}
+{% include '_result.djhtml' %}
 {% endblock %}

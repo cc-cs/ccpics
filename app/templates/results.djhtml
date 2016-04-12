@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout.djhtml' %}
 {% set title = '{} : results'.format(session['username']) %}
 {% set active_page = "results" %}
 

@@ -15,7 +15,7 @@ def submission_upload(question_id):
 
     question = question['question']
 
-    return render_template('submission-upload.html', question=question)
+    return render_template('submission-upload.djhtml', question=question)
 
 @app.route('/submission-result', methods=['POST'])
 def submission_result():
@@ -56,9 +56,9 @@ def render_submissions():
     admin = request.args.get('admin', None)
     submissions = submission_service.fetch_submissions()['submissions']
     if admin and session['user_id'] in app.config['ADMINS']:
-        return render_template('admin-submissions.html', submissions=submissions)
+        return render_template('admin-submissions.djhtml', submissions=submissions)
     submissions = [submission for submission in submissions if submission['user-id'] == session['user_id']]
-    return render_template('submissions.html', submissions=submissions)
+    return render_template('submissions.djhtml', submissions=submissions)
 
 @app.route('/submissions/<submission_id>', methods=['GET'])
 def render_submission(submission_id):
@@ -83,4 +83,4 @@ def render_submission(submission_id):
 
     result = result['result']
     
-    return render_template('submission.html', submission=submission, result=result)
+    return render_template('submission.djhtml', submission=submission, result=result)

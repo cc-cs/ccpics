@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout.djhtml' %}
 {% set title = 'PiCS: {}'.format(user.username) %}
 {% set active_page = "user" %}
 

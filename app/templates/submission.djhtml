@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layout.djhtml' %}
 {% set title = '{} : submission {}'.format(submission['question-title'], submission.id) %}
 {% set active_page = "submission" %}
 
@@ -16,5 +16,5 @@
   <pre class="submission-source-code">{{ submission['source-code'] }}</pre>
 </p>
 
-{% include '_result.html' %}
+{% include '_result.djhtml' %}
 {% endblock %}
