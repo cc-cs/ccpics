@@ -4,6 +4,7 @@ import re
 import requests
 import subprocess
 import urllib
+import resource
 
 data_dir = os.path.join(os.getcwd(), '../data/results/')
 
@@ -92,38 +93,57 @@ def process_submissions():
 
     return result_submission_responses        
 
+TIMEOUT_ERROR = 'TO'
+COMPILATION_ERROR = 'CE'
+
 def run_cpp(filename, test_cases,time_out):
     subprocess.Popen('g++ %s -o %s' % (filename + '.cpp', filename + '.exe'), shell=True, stdout=subprocess.PIPE).stdout.read()
+    results = {}
     outputs = []
+    times = []
     # run test cases scenario (input)
     if test_cases:
         for test in test_cases:
             if not os.path.exists(filename + '.exe'):
-                outputs.append(("CE", "TO", ''))
+                results['ERROR'] = COMPILATION_ERROR
+                #outputs.append(("CE", "TO", ''))
                 break
             else:
                 p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
                                      stdout=subprocess.PIPE,
                                      stdin=subprocess.PIPE)
                 try:
+                    usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
                     output = str(p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0])
-                    outputs.append(("", '', output))
+                    usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
+                    cpu_time = usage_end.ru_utime - usage_start.ru_utime
+                    times.append(cpu_time)
+                    outputs.append(output)
+
                 except subprocess.TimeoutExpired:
-                    outputs.append(("", "TO", ''))
+                    results['ERROR'] = TIMEOUT_ERROR
+                    #outputs.append(("", "TO", ''))
     # run no input scenario
     else:
         if not os.path.exists(filename + '.exe'):
-            outputs.append(("CE", "TO", ''))
+            results['ERROR'] = COMPILATION_ERROR
+            #outputs.append(("CE", "TO", ''))
         else:
             p = subprocess.Popen('./%s' % (filename + '.exe'), shell=True,
                                       stdout=subprocess.PIPE)
             try:
+                usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
                 output = str(p.communicate(timeout=time_out)[0])
-                outputs.append(("Compiled", 'No time-out', output))
+                usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
+                cpu_time = usage_end.ru_utime - usage_start.ru_utime
+                times.append(cpu_time)
+                outputs.append(output)
             except subprocess.TimeoutExpired:
-                outputs.append(("", "TO", ''))
-                        
-    return outputs
+                results['ERROR'] = TIMEOUT_ERROR
+                #outputs.append(("", "TO", ''))
+    results['outputs'] = outputs
+    results['times'] = times   
+    return results
 
 def get_java_name(s):
     pclass = "(public(\s+)class(\s+))[A-Za-z0-9_]+"
@@ -133,9 +153,12 @@ def get_java_name(s):
 def run_java(filename, test_cases, time_out):
     subprocess.Popen('javac %s' % (filename + '.java'), shell=True, stdout=subprocess.PIPE).stdout.read()
     outputs = []
+    times = []
+    results = {}
     if test_cases:
         for test in test_cases:
             if not os.path.exists(filename + '.class'):
+                results['ERROR'] = COMPILATION_ERROR
                 outputs.append(("CE", "TO", ''))
                 break
             else:
@@ -143,23 +166,36 @@ def run_java(filename, test_cases, time_out):
                     p = subprocess.Popen('java %s' % (filename), shell=True,
                                          stdout=subprocess.PIPE,
                                          stdin=subprocess.PIPE)
+                    usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
                     output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0]
-                    outputs.append(("", "", output))
+                    usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
+                    cpu_time = usage_end.ru_utime - usage_start.ru_utime
+                    times.append(cpu_time)
+                    outputs.append(output)
                 except subprocess.TimeoutExpired:
-                    outputs.append(("", "TO", ''))
+                    results['ERROR'] = TIMEOUT_ERROR
+                    #outputs.append(("", "TO", ''))
     # run no input scenario
     else:
         if not os.path.exists(filename + '.class'):
+            results['ERROR'] = COMPILATION_ERROR
             outputs.append(("CE", "Timed-out", ''))
         else:
             try:
                 p = subprocess.Popen('java %s' % (filename), shell=True,
                                      stdout=subprocess.PIPE,
                                      stdin=subprocess.PIPE)
+                usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
                 output = p.communicate(timeout=time_out)[0]
-                outputs.append(("", "", output))
+                usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
+                cpu_time = usage_end.ru_utime - usage_start.ru_utime
+                times.append(cpu_time)
+                outputs.append(output)
             except subprocess.TimeoutExpired:
-                outputs.append(("", "", ''))
+                results['ERROR'] = TIMEOUT_ERROR
+                #outputs.append(("", "", ''))
+    results['outputs'] = outputs
+    results['times'] = times
     return outputs
         
 def load_code(source_json, test_cases, time_out):
@@ -188,28 +224,35 @@ def grade_submission(submission, solution, question):
     test_cases = question['test-cases']
     time_out = question['time-out']
     result = {}
-    outputs = load_code(submission, test_cases, time_out)
-    expecteds = load_code(solution, test_cases, time_out)
+    submission_results = load_code(submission, test_cases, time_out)
+    expected_results = load_code(solution, test_cases, time_out)
+    expecteds = expected_results['outputs']
+    outputs = submission_results['outputs']
     result['outputs'] = outputs
+    result['times'] = submission_results['times']
     result['expecteds'] = expecteds
     result['test-cases'] = question['test-cases']
     grades = []
     # if outputs == 'Unsupported Language':
     #     return outputs
-    if outputs[0][0] == 'CE': # will be true if program didn't compile
-        result['verdict'] = 'Compilation Error'
+    # if outputs[0][0] == 'CE': # will be true if program didn't compile
+    #     result['verdict'] = 'Compilation Error'
+    #     result['grades'] = grades
+    #     return result
+    if 'ERROR' in submission_results:
+        if submission_results['ERROR'] == COMPILATION_ERROR:
+            result['verdict'] = 'Compilation Error'
+        elif submission_results['ERROR'] == TIMEOUT_ERROR:
+            result['verdict'] = 'Time-out'
         result['grades'] = grades
         return result
     for output, expected in zip(outputs, expecteds): # if compiled go through list
-        if output[1] == 'TO':
-            result['verdict'] = 'Time-out' # One test case ran out of time
-            grades.append('Time-out')
-        elif output[2] == expected[2]:
+        if output[2] == expected[2]:
             grades.append('pass') # this test case passed
         else:
             grades.append('fail') # this test case failed
-    if 'verdict' not in result: # if no verdict has been set, pass is still possible
-        result['verdict'] = 'fail' if 'fail' in grades else 'pass'
+    
+    result['verdict'] = 'fail' if 'fail' in grades else 'pass'
     result['grades'] = grades
     return result
 
