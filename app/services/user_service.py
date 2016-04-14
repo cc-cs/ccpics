@@ -29,7 +29,7 @@ def fetch_max_user_id():
 
     user_ids = fetch_user_ids()
     
-    return int(max(user_ids)[:-4]) if submission_ids else -1
+    return int(max(user_ids)[:-4]) if user_ids else -1
 
 def fetch_user_files():
     '''Return all valid user data files.'''

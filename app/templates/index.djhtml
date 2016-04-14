@@ -3,6 +3,6 @@
 {% set active_page = "index" %}
 
 {% block body %}
-	<h1>Welcome to the PiCS website!</h1>
+  <h1>Welcome to the PiCS website!</h1>
 {% endblock %}
 
