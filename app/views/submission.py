@@ -76,6 +76,9 @@ def render_submission(submission_id):
     results = [result for result in results
                if result['submission-id'] == submission['id']]
 
+    if not results:
+        return render_template('submission.djhtml', submission=submission, result=[])
+    
     result_id = results[0]['id']
     result = result_service.fetch_result(result_id)
     if 'error' in result:

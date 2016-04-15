@@ -1,10 +1,27 @@
 <p>Graded: {{ momentjs(result.timestamp).calendar() }}</p>
 <p>Verdict: {{ result.verdict }}</p>
 
-{% for test_result in result['test-results'] %}
-<div class="test-case">
-  <p>Test #{{ loop.index }}:
-    <pre class="test-result">{{ test_result }}</pre>
-  </p>
-</div>
-{% endfor %}
+{% if result.verdict.lower() == 'Compilation failure'.lower() %}
+  <div class="result-display">
+    <p>Your program failed to compile. Error log from the compiler:</p>
+    <pre class="result-display">
+      {{ result['test-results']['compiler-stderr'] }}
+    </pre>
+  </div>
+{% else %}
+  {% for test_case in result['test-cases'] %}
+    <div class="result-display">
+      <p>Test #{{ loop.index }}:</p>
+      <p>Test case:</p>
+      <pre class="result-display">{{ test_case }}</pre>
+      <p>Your output:</p>
+      <pre class="result-display">{{ test_case['output'] }}</pre>
+      <p>Expected output:</p>
+      <pre class="result-display">{{ test_case['expected'] }}</pre>
+      <p>Time taken:</p>
+      <pre class="result-display">{{ test_case['time-taken'] }}</pre>
+      <p>Result:</p>
+      <pre class="result-display">{{ test_case['grades'] }}</pre>
+    </div>
+  {% endfor %}
+{% endif %}
