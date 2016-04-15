@@ -83,7 +83,7 @@ def process_submissions():
         }
         result_submission_responses.append(submit_result(data=result))
 
-        return result_submission_responses        
+    return result_submission_responses
 
 TIMEOUT_ERROR = 'TO'
 COMPILATION_ERROR = 'CE'
@@ -115,7 +115,7 @@ def run(filename, test_cases, time_out, settings, source_json):
             if 'compile' in settings:
                 file_create(source_json)
                 p = subprocess.Popen(settings['compile'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                results['compiler-stderr'] = str(p.stderr.read())
+                results['compiler-stderr'] = p.stderr.read().decode()
                 if not os.path.exists(settings['CompiledFile']):
                     results['ERROR'] = COMPILATION_ERROR
                     break
@@ -125,7 +125,7 @@ def run(filename, test_cases, time_out, settings, source_json):
                                  stdin=subprocess.PIPE)
             try:
                 usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
-                output = str(p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0])
+                output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0].decode()
                 usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
                 cpu_time = usage_end.ru_utime - usage_start.ru_utime
                 times.append(cpu_time)
@@ -136,7 +136,7 @@ def run(filename, test_cases, time_out, settings, source_json):
         if 'compile' in settings:
             file_create(source_json)
             p = subprocess.Popen(settings['compile'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            results['compiler-stderr'] = str(p.stderr.read())
+            results['compiler-stderr'] = p.stderr.read().decode()
             if not os.path.exists(filename + '.exe'):
                 results['ERROR'] = COMPILATION_ERROR
             else:
@@ -144,7 +144,7 @@ def run(filename, test_cases, time_out, settings, source_json):
                                      stdout=subprocess.PIPE)
                 try:
                     usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
-                    output = str(p.communicate(timeout=time_out)[0])
+                    output = p.communicate(timeout=time_out)[0].decode()
                     usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
                     cpu_time = usage_end.ru_utime - usage_start.ru_utime
                     times.append(cpu_time)
@@ -204,7 +204,6 @@ def grade_submission(submission, solution, question):
     expecteds = expected_results['outputs']
     outputs = submission_results['outputs']
     result['compiler-stderr'] = submission_results['compiler-stderr']
-    grades = []
     result['test-cases'] = {'__default__': {}}
 
     if 'ERROR' in submission_results:
@@ -216,28 +215,24 @@ def grade_submission(submission, solution, question):
 
         return result
 
-    print(submission_results)
-    print(expected_results)
+    result['verdict'] = 'pass'
     for i, test_case in enumerate(question['test-cases']):
         result['test-cases'][test_case] = {}
-        result['test-cases'][test_case]['time-taken'] = submission_results['times'][i]
-        result['test-cases'][test_case]['output'] = submission_results['outputs'][i]
-        result['test-cases'][test_case]['expected'] = expected_results['outputs'][i]
-        
-    if not question['test-cases']:
-        result['test-cases']['__default__']['time-taken'] = submission_results['times'][0]
+        result['test-cases'][test_case]['time-taken'] = '{:.8f}'.format(submission_results['times'][i])
+        output = result['test-cases'][test_case]['output'] = submission_results['outputs'][i]
+        expected = result['test-cases'][test_case]['expected'] = expected_results['outputs'][i]
+        if output == expected:
+            result['test-cases'][test_case]['decree'] = 'pass'
+        else:
+            result['test-cases'][test_case]['decree'] = 'fail'
+            result['verdict'] = 'fail'
+            
+    if question['test-cases']:
+        result['test-cases'].pop('__default__')
+    else:
+        result['test-cases']['__default__']['time-taken'] = '{:.8f}'.format(submission_results['times'][0])
         result['test-cases']['__default__']['output'] = submission_results['outputs'][0]
         result['test-cases']['__default__']['expected'] = expected_results['outputs'][0]
-        
-    grades = []
-    for output, expected in zip(outputs, expecteds): # if compiled go through list
-        if output[2] == expected[2]:
-            grades.append('pass') # this test case passed
-        else:
-            grades.append('fail') # this test case failed
-            
-    result['verdict'] = 'fail' if 'fail' in grades else 'pass'
-    result['grades'] = grades
 
     return result
 

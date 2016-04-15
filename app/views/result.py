@@ -1,4 +1,4 @@
-from flask import flash, json, redirect, request, render_template, url_for, session
+from flask import abort, request, render_template
 
 from .. import app
 from ..services import question_service
@@ -15,5 +15,10 @@ def render_results():
 
 @app.route('/results/<result_id>', methods=['GET'])
 def render_result(result_id):
-    result = result_service.fetch_result(result_id=result_id)['result']
+    result = result_service.fetch_result(result_id=result_id)
+    if 'error' in result:
+        abort(result['status'], result['error'])
+
+    result = result['result']
+
     return render_template('result.djhtml', result=result)
