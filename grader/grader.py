@@ -106,6 +106,33 @@ def file_create(source_json):
 
     return filename
 
+def code_compile(filename, command, compiledfile, source_json, results):
+    file_create(source_json)
+    p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    results['compiler-stderr'] = p.stderr.read().decode()
+    if not os.path.exists(compiledfile):
+        return False
+    return True
+
+def run_and_time(command, time_out, results, test=None):
+    p = subprocess.Popen(command, shell=True,
+                                 stdout=subprocess.PIPE,
+                                 stdin=subprocess.PIPE)
+    try:
+        usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
+        if test:
+            output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0].decode()
+        else:
+            output = p.communicate(timeout=time_out)[0].decode()
+        usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
+        cpu_time = usage_end.ru_utime - usage_start.ru_utime
+        return output, cpu_time, False
+    except subprocess.TimeoutExpired as to:
+        results['ERROR'] = TIMEOUT_ERROR
+        usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
+        cpu_time = str(time_out)#usage_end.ru_utime - usage_start.ru_utime
+        return '', cpu_time, True
+
 def run(filename, test_cases, time_out, settings, source_json):
     results = {}
     outputs = []
@@ -113,44 +140,25 @@ def run(filename, test_cases, time_out, settings, source_json):
     if test_cases:
         for test in test_cases:
             if 'compile' in settings:
-                file_create(source_json)
-                p = subprocess.Popen(settings['compile'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                results['compiler-stderr'] = p.stderr.read().decode()
-                if not os.path.exists(settings['CompiledFile']):
+                if not code_compile(filename, settings['compile'], settings['CompiledFile'], source_json, results):
                     results['ERROR'] = COMPILATION_ERROR
                     break
+            output, cpu_time, timed_out = run_and_time(settings['run'], time_out, results, test)
+            outputs.append(output)
+            times.append(cpu_time)
+            if timed_out:
+                break
 
-            p = subprocess.Popen(settings['run'], shell=True,
-                                 stdout=subprocess.PIPE,
-                                 stdin=subprocess.PIPE)
-            try:
-                usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
-                output = p.communicate(input=bytearray(test, 'utf-8'), timeout=time_out)[0].decode()
-                usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
-                cpu_time = usage_end.ru_utime - usage_start.ru_utime
-                times.append(cpu_time)
-                outputs.append(output)
-            except subprocess.TimeoutExpired:
-                results['ERROR'] = TIMEOUT_ERROR
     else: # run no input scenario
         if 'compile' in settings:
-            file_create(source_json)
-            p = subprocess.Popen(settings['compile'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            results['compiler-stderr'] = p.stderr.read().decode()
-            if not os.path.exists(filename + '.exe'):
+            if not code_compile(filename, settings['compile'], settings['CompiledFile'], source_json, results):
                 results['ERROR'] = COMPILATION_ERROR
             else:
-                p = subprocess.Popen(settings['run'], shell=True,
-                                     stdout=subprocess.PIPE)
-                try:
-                    usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
-                    output = p.communicate(timeout=time_out)[0].decode()
-                    usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
-                    cpu_time = usage_end.ru_utime - usage_start.ru_utime
-                    times.append(cpu_time)
-                    outputs.append(output)
-                except subprocess.TimeoutExpired:
-                    results['ERROR'] = TIMEOUT_ERROR
+            
+                output, cpu_time, timed_out = run_and_time(settings['run'], time_out, results)
+                outputs.append(output)
+                times.append(cpu_time)
+
 
     results['outputs'] = outputs
     results['times'] = times   
@@ -205,35 +213,46 @@ def grade_submission(submission, solution, question):
     outputs = submission_results['outputs']
     result['compiler-stderr'] = submission_results['compiler-stderr']
     result['test-cases'] = {'__default__': {}}
-
     if 'ERROR' in submission_results:
         if submission_results['ERROR'] == COMPILATION_ERROR:
             result['verdict'] = 'Compilation failure'
+            return result
         elif submission_results['ERROR'] == TIMEOUT_ERROR:
             result['verdict'] = 'Timed out'
-            result['grades'] = grades
+            #result['grades'] = []
 
-        return result
-
-    result['verdict'] = 'pass'
+    
     for i, test_case in enumerate(question['test-cases']):
+        if i >= len(outputs):
+            print('Out')
+            break
         result['test-cases'][test_case] = {}
         result['test-cases'][test_case]['time-taken'] = '{:.8f}'.format(submission_results['times'][i])
-        output = result['test-cases'][test_case]['output'] = submission_results['outputs'][i]
-        expected = result['test-cases'][test_case]['expected'] = expected_results['outputs'][i]
+        output = result['test-cases'][test_case]['output'] = outputs[i]
+        expected = result['test-cases'][test_case]['expected'] = expecteds[i]
         if output == expected:
+            print(output, expected)
             result['test-cases'][test_case]['decree'] = 'pass'
         else:
             result['test-cases'][test_case]['decree'] = 'fail'
-            result['verdict'] = 'fail'
+            if not 'verdict' in result:
+                result['verdict'] = 'fail'
             
     if question['test-cases']:
         result['test-cases'].pop('__default__')
     else:
         result['test-cases']['__default__']['time-taken'] = '{:.8f}'.format(submission_results['times'][0])
-        result['test-cases']['__default__']['output'] = submission_results['outputs'][0]
-        result['test-cases']['__default__']['expected'] = expected_results['outputs'][0]
+        result['test-cases']['__default__']['output'] = outputs[0]
+        result['test-cases']['__default__']['expected'] = expecteds[0]
+        if outputs[0] == expecteds[0]:
+            result['test-cases']['__default__']['decree'] = 'pass'
+        else:
+            result['test-cases']['__default__']['decree'] = 'fail'
+            if not 'verdict' in result:
+                result['verdict'] = 'fail'
 
+    if not 'verdict' in result:
+        result['verdict'] = 'pass'
     return result
 
 if __name__ == '__main__':
