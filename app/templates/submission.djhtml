@@ -13,7 +13,7 @@
 <p>Status: {{ submission.status }}</p>
 <p>Language: {{ submission.language }}</p>
 <p>Code:
-  <pre class="submission-source-code">{{ submission['source-code'] }}</pre>
+  <pre class="submission-source-code">{{ submission['source-code'] | e }}</pre>
 </p>
 
 {% if result %}

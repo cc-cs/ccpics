@@ -1,4 +1,4 @@
-from flask import abort, request, render_template
+from flask import abort, request, render_template, session
 
 from .. import app
 from ..services import question_service

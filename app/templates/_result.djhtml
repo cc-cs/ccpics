@@ -9,7 +9,6 @@
     </pre>
   </div>
 {% else %}
-  {{ result }}
   {% for test_case, test_result in result['test-results']['test-cases'].items() %}
     <div class="result-display">
       <p>Test #{{ loop.index }}:</p>

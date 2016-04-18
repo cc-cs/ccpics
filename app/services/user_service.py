@@ -52,10 +52,12 @@ def check_presence(keys=ESSENTIALS, data=None):
 
     return {'status': 200}
 
-def check_uniqueness(keys=UNIQUES, data=None):
+def check_uniqueness(keys=UNIQUES, data=None, *, ignore_self=False):
     '''Check if the given data is unique in the DB for the provided keys.'''
-
     user_files = fetch_user_files()
+    if ignore_self:
+        user_files.remove('{}.txt'.format(data['id']))    
+
     for user_file in user_files:
         with open(user_file, 'r') as f:
             file_data = json.load(f)
@@ -130,6 +132,25 @@ def add_user(user_data):
     
     return {'user': user_data}
 
+def update_user(user_id, data):
+    user_data = fetch_user(user_id)
+    for k, v in data.items():
+        try:
+            user_data[k] = v
+        except KeyError:
+            return {'status': 400, 'error': "Invalid field: {}".format(k)}
+
+    # Check for uniqueness on desired fields.
+    uniqueness_check = check_uniqueness(data=user_data, ignore_self=True)
+    if 'error' in uniqueness_check:
+        return {'status': uniqueness_check['status'], 'error': uniqueness_check['error']}
+    
+    # Store the information if no errors encountered.
+    save_user(user_id, user_data)
+
+    user_data = {k: user_data[k] for k in user_data if k not in HIDDEN}
+    
+    return {'user': user_data}
 
 ###############################################################################
 # Service API endpoints
