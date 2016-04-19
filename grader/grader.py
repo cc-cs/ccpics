@@ -202,7 +202,12 @@ def load_code(source_json, test_cases, time_out):
         os.system('rm -rf temp')
 
     return result
-            
+
+def clean(s):
+	s = s.rstrip().split('\n')
+	s = [r.rstrip() for r in s]
+	return '\n'.join(s)
+
 def grade_submission(submission, solution, question):
     test_cases = question['test-cases']
     time_out = question['time-out']
@@ -228,8 +233,8 @@ def grade_submission(submission, solution, question):
             break
         result['test-cases'][test_case] = {}
         result['test-cases'][test_case]['time-taken'] = '{:.8f}'.format(submission_results['times'][i])
-        output = result['test-cases'][test_case]['output'] = outputs[i]
-        expected = result['test-cases'][test_case]['expected'] = expecteds[i]
+        output = result['test-cases'][test_case]['output'] = clean(outputs[i])
+        expected = result['test-cases'][test_case]['expected'] = clean(expecteds[i])
         if output == expected:
             print(output, expected)
             result['test-cases'][test_case]['decree'] = 'pass'
@@ -242,9 +247,9 @@ def grade_submission(submission, solution, question):
         result['test-cases'].pop('__default__')
     else:
         result['test-cases']['__default__']['time-taken'] = '{:.8f}'.format(submission_results['times'][0])
-        result['test-cases']['__default__']['output'] = outputs[0]
-        result['test-cases']['__default__']['expected'] = expecteds[0]
-        if outputs[0] == expecteds[0]:
+        output = result['test-cases']['__default__']['output'] = clean(outputs[0])
+        expected = result['test-cases']['__default__']['expected'] = clean(expecteds[0])
+        if output == expected:
             result['test-cases']['__default__']['decree'] = 'pass'
         else:
             result['test-cases']['__default__']['decree'] = 'fail'
@@ -256,6 +261,6 @@ def grade_submission(submission, solution, question):
     return result
 
 if __name__ == '__main__':
-    #set_urls(url_root=local_url)
-    set_urls(url_root=remote_url)
+    set_urls(url_root=local_url)
+    #set_urls(url_root=remote_url)
     print(process_submissions())
