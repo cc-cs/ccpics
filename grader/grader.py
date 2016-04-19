@@ -256,6 +256,6 @@ def grade_submission(submission, solution, question):
     return result
 
 if __name__ == '__main__':
-    set_urls(url_root=local_url)
-    #set_urls(url_root=remote_url)
+    #set_urls(url_root=local_url)
+    set_urls(url_root=remote_url)
     print(process_submissions())

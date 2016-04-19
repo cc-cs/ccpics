@@ -16,7 +16,7 @@
     {% for user in users %}
     <tr>
       <td>{{ user.id }}</td>
-      <td><a href="/users/{{user.id}}">{{ user.username }}</a></td>
+      <td><a href="/users/{{user.id}}">{{ user.username | e}}</a></td>
       <td>TBI</td>
     </tr>
     {% endfor %}

@@ -5,7 +5,7 @@
   <div class="result-display">
     <p>Your program failed to compile. Error log from the compiler:</p>
     <pre class="result-display">
-      {{ result['test-results']['compiler-stderr'] }}
+      {{ result['test-results']['compiler-stderr'] | e}}
     </pre>
   </div>
 {% else %}
@@ -15,7 +15,7 @@
       <p>Test case:</p>
       <pre class="result-display">{{ test_case }}</pre>
       <p>Your output:</p>
-      <pre class="result-display">{{ test_result['output'] }}</pre>
+      <pre class="result-display">{{ test_result['output'] | e}}</pre>
       <p>Expected output:</p>
       <pre class="result-display">{{ test_result['expected'] }}</pre>
       <p>Time taken:</p>
