@@ -123,3 +123,30 @@ table.users th, table.users td
 #main-container > div {
   margin: 10px;
 }
+
+#user-charts {
+  text-align: center;
+}
+
+.chart-container {
+  /*float: left;*/
+  display: inline-block;
+  padding: 30px;
+  padding-top: 0;
+}
+
+.chart-title {
+  display: block;
+  margin-top: -30px;
+}
+
+#user-stat-printout {
+  margin-top: 10px;
+  padding: 10px 0;
+}
+
+#user-stat-printout table {
+  border-collapse: separate;
+  border-spacing: 10px 0;
+  text-align: left;
+}

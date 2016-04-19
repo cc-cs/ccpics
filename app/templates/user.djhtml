@@ -2,9 +2,127 @@
 {% set title = 'PiCS: {}'.format(user.username) %}
 {% set active_page = "user" %}
 
+{% block css %}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/circle.css') }}">
+{% endblock %}
+
 {% block body %}
-<h1>{{ user.username }}</h1>
-<p>
-Stats: TODO
-</p>
+
+	<h1>{{ user.username }}</h1>
+
+	<h2>Your stats</h2>
+
+	<div id="user-charts">
+
+		<div class="chart-container">
+			<div class="c100 p{{ pass_percent|int }} green">
+			    <span>
+			    	<span>{{ pass_percent }}%</span>
+						<div class="chart-title">
+							<b>Correct</b>
+						</div>
+			    </span>
+			    <div class="slice">
+			        <div class="bar"></div>
+			        <div class="fill"></div>
+			    </div>
+			</div>
+		</div>
+
+		<div class="chart-container">
+			<div class="c100 p{{ fail_percent|int }} orange">
+			    <span>
+			    	<span>{{ fail_percent }}%</span>
+						<div class="chart-title">
+							<b>Failed</b>
+						</div>
+			    </span>
+			    <div class="slice">
+			        <div class="bar"></div>
+			        <div class="fill"></div>
+			    </div>
+			</div>
+		</div>
+
+		<div class="chart-container">
+			<div class="c100 p{{ compfail_percent|int }}">
+			    <span>
+			    	<span>{{ compfail_percent }}%</span>
+						<div class="chart-title">
+							<b>Compile Error</b>
+						</div>
+			    </span>
+			    <div class="slice">
+			        <div class="bar"></div>
+			        <div class="fill"></div>
+			    </div>
+			</div>
+		</div>
+
+		<div class="chart-container">
+			<div class="c100 p{{ timedout_percent|int }}">
+			    <span>
+			    	<span>{{ timedout_percent }}%</span>
+						<div class="chart-title">
+							<b>Timeout</b>
+						</div>
+			    </span>
+			    <div class="slice">
+			        <div class="bar"></div>
+			        <div class="fill"></div>
+			    </div>
+			</div>
+		</div>
+
+		<div id="user-stat-printout">
+			<table>
+				<tr>
+					<td>
+						<h2>Total number of submissions:</h2>
+					</td>
+					<td>
+						<h3>{{ num_results }}</h3>
+					</td>
+				</tr>	
+
+				<tr>
+					<td>
+						<h2>Number of submissions passed:</h2>
+					</td>
+					<td>
+						<h3>{{ num_pass }}</h3>
+					</td>
+				</tr>	
+
+				<tr>
+					<td>
+						<h2>Number of submissions failed:</h2>
+					</td>
+					<td>
+						<h3>{{ num_fail }}</h3>
+					</td>
+				</tr>	
+
+				<tr>
+					<td>
+						<h2>Number of submissions with a compiler error:</h2>
+					</td>
+					<td>
+						<h3>{{ num_compfail }}</h3>
+					</td>
+				</tr>	
+
+				<tr>
+					<td>
+						<h2>Number of submissions which timed out:</h2>
+					</td>
+					<td>
+						<h3>{{ num_timedout }}</h3>
+					</td>
+				</tr>	
+			</table>	
+		</div>
+
+	</div>
+
 {% endblock %}
