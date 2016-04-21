@@ -236,7 +236,6 @@ def grade_submission(submission, solution, question):
         output = result['test-cases'][test_case]['output'] = clean(outputs[i])
         expected = result['test-cases'][test_case]['expected'] = clean(expecteds[i])
         if output == expected:
-            print(output, expected)
             result['test-cases'][test_case]['decree'] = 'pass'
         else:
             result['test-cases'][test_case]['decree'] = 'fail'

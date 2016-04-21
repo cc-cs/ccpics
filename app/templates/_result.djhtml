@@ -8,6 +8,18 @@
       {{ result['test-results']['compiler-stderr'] | e}}
     </pre>
   </div>
+{% elif '__default__' in result['test-results']['test-cases'] %}
+  {% set test_result = result['test-results']['test-cases']['__default__'] %}
+  <div class="result-display">
+    <p>Your output:</p>
+    <pre class="result-display">{{ test_result['output'] | e}}</pre>
+    <p>Expected output:</p>
+    <pre class="result-display">{{ test_result['expected'] }}</pre>
+    <p>Time taken:</p>
+    <pre class="result-display">{{ test_result['time-taken'] }}</pre>
+    <p>Judge's decree:</p>
+    <pre class="result-display">{{ test_result['decree'] }}</pre>
+  </div>  
 {% else %}
   {% for test_case, test_result in result['test-results']['test-cases'].items() %}
     <div class="result-display">
